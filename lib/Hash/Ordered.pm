@@ -69,6 +69,67 @@ sub delete {
     return undef;
 }
 
+sub push {
+    my ( $self, @pairs ) = @_;
+    while (@pairs) {
+        my ( $k, $v ) = splice( @pairs, 0, 2 );
+        if ( exists $self->[_DATA]{$k} ) {
+            # splice out key
+            # XXX could put an index on this later if linear search is too slow
+            my $r = $self->[_KEYS];
+            my $i = List::Util::first { $r->[$_] eq $k } 0 .. $#$r;
+            splice @$r, $i, 1;
+        }
+        push @{ $self->[_KEYS] }, $k;
+        $self->[_DATA]{$k} = $v;
+    }
+    return scalar $self->keys;
+}
+
+sub pop {
+    my ($self) = @_;
+    my $key = pop @{ $self->[_KEYS] };
+    return $key, delete $self->[_DATA]{$key};
+}
+
+sub unshift {
+    my ( $self, @pairs ) = @_;
+    while (@pairs) {
+        my ( $k, $v ) = splice( @pairs, -2, 2 );
+        if ( exists $self->[_DATA]{$k} ) {
+            # splice out key
+            # XXX could put an index on this later if linear search is too slow
+            my $r = $self->[_KEYS];
+            my $i = List::Util::first { $r->[$_] eq $k } 0 .. $#$r;
+            splice @$r, $i, 1;
+        }
+        unshift @{ $self->[_KEYS] }, $k;
+        $self->[_DATA]{$k} = $v;
+    }
+    return scalar $self->keys;
+}
+
+sub shift {
+    my ($self) = @_;
+    my $key = shift @{ $self->[_KEYS] };
+    return $key, delete $self->[_DATA]{$key};
+}
+
+sub as_list {
+    my ($self) = @_;
+    return map { ; $_ => $self->[_DATA]{$_} } @{ $self->[_KEYS] };
+}
+
+sub iterator {
+    my ($self) = @_;
+    my @keys   = @{ $self->[_KEYS] };
+    my $data   = $self->[_DATA];
+    return sub {
+        return unless @keys;
+        return $data->{ shift @keys };
+    };
+}
+
 1;
 
 =for Pod::Coverage BUILD

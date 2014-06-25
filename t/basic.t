@@ -1,4 +1,4 @@
-use 5.008001;
+use 5.006;
 use strict;
 use warnings;
 use Test::More 0.96;
@@ -53,6 +53,69 @@ subtest "element methods" => sub {
     is( $hash->set( "c", 3 ), 3, "set another key" );
     cmp_deeply( [ $hash->keys ],   [qw/b c/], "keys ordered as expected" );
     cmp_deeply( [ $hash->values ], [qw/2 3/], "values ordered as expected" );
+
+};
+
+subtest "output and iteration" => sub {
+
+    my $hash = new_ok( HO, [ 'a' .. 'z' ], "new('a'..'z')" );
+
+    cmp_deeply( [ $hash->as_list ], [ 'a' .. 'z' ], "as_list" );
+
+    my $iter = $hash->iterator;
+    my @saw;
+    while ( my ( $k, $v ) = $iter->() ) {
+        push @saw, $k, $v;
+    }
+    cmp_deeply( [ $hash->as_list ], [ 'a' .. 'z' ], "iterator walked hash in order" );
+
+};
+
+subtest "list methods" => sub {
+
+    my $hash = new_ok( HO, [ a => 1 ], "new( a => 1 )" );
+
+    is( $hash->push( b => 2, c => 3 ), 3, "pushing 2 new pairs" );
+
+    cmp_deeply(
+        [ $hash->as_list ],
+        [ a => 1, b => 2, c => 3 ],
+        "hash keys/values correct after pushing new pairs"
+    );
+
+    cmp_deeply( [ $hash->pop ], [ c => 3 ], "pop returns last pair" );
+
+    cmp_deeply(
+        [ $hash->as_list ],
+        [ a => 1, b => 2 ],
+        "hash keys/values correct after pop"
+    );
+
+    is( $hash->unshift( y => 25, z => 26 ), 4, "unshifting 2 pairs" );
+
+    cmp_deeply(
+        [ $hash->as_list ],
+        [ y => 25, z => 26, a => 1, b => 2 ],
+        "hash keys/values correct after unshifting new pairs"
+    );
+
+    cmp_deeply( [ $hash->shift ], [ y => 25 ], "shift returns first pair" );
+
+    ok( $hash->push( z => 42 ), "pushing existing key with new value" );
+
+    cmp_deeply(
+        [ $hash->as_list ],
+        [ a => 1, b => 2, z => 42 ],
+        "hash keys/values correct after pushing existing key"
+    );
+
+    ok( $hash->unshift( z => 26 ), "unshifting existing key with new value" );
+
+    cmp_deeply(
+        [ $hash->as_list ],
+        [ z => 26, a => 1, b => 2 ],
+        "hash keys/values correct after unshifting existing key"
+    );
 
 };
 
