@@ -7,6 +7,7 @@ package Hash::Ordered;
 # VERSION
 
 use Carp ();
+use List::Util 1.09 ();
 
 use constant {
     _DATA => 0,
@@ -22,6 +23,12 @@ sub new {
     return bless $self, $class;
 }
 
+sub clone {
+    my ($self) = @_;
+    my $clone = [ { %{ $self->[_DATA] } }, [ @{ $self->[_KEYS] } ] ];
+    return bless $clone, ref $self;
+}
+
 sub keys {
     my ($self) = @_;
     return @{ $self->[_KEYS] };
@@ -30,6 +37,36 @@ sub keys {
 sub values {
     my ($self) = @_;
     return map { $self->[_DATA]{$_} } @{ $self->[_KEYS] };
+}
+
+sub exists {
+    my ( $self, $key ) = @_;
+    return exists $self->[_DATA]{$key};
+}
+
+sub get {
+    my ( $self, $key ) = @_;
+    return $self->[_DATA]{$key};
+}
+
+sub set {
+    my ( $self, $key, $value ) = @_;
+    if ( !exists $self->[_DATA]{$key} ) {
+        push @{ $self->[_KEYS] }, $key;
+    }
+    return $self->[_DATA]{$key} = $value;
+}
+
+sub delete {
+    my ( $self, $key ) = @_;
+    if ( exists $self->[_DATA]{$key} ) {
+        # XXX could put an index on this later if linear search is too slow
+        my $r = $self->[_KEYS];
+        my $i = List::Util::first { $r->[$_] eq $key } 0 .. $#$r;
+        splice @$r, $i, 1;
+        return delete $self->[_DATA]{$key};
+    }
+    return undef;
 }
 
 1;
