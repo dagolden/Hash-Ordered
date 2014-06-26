@@ -126,7 +126,7 @@ sub iterator {
     my $data   = $self->[_DATA];
     return sub {
         return unless @keys;
-        return $data->{ shift @keys };
+        return $data->{ CORE::shift @keys };
     };
 }
 
