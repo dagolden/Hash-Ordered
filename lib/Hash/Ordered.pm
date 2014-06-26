@@ -138,6 +138,27 @@ sub iterator {
 
     use Hash::Ordered;
 
+    my $oh = Hash::Ordered->new( a => 1 );
+
+    $oh->get( 'a');
+    $oh->set( 'a' => 2 );
+
+    $oh->exists('a');
+    $oh->delete('a');
+
+    @keys  = $oh->keys;
+    @vals  = $oh->values;
+    @pairs = $oh->as_list
+
+    $oh->push( c => 3, d => 4 );
+    $oh->unshift( e => 5, f => 6 );
+
+    ($k,$v) = $oh->pop;
+    ($k,$v) = $oh->shift;
+
+    $iter = $oh->iterator;
+    while( ($k, $v) = $iter->() ) { ... }
+
 =head1 DESCRIPTION
 
 This module might be cool, but you'd never know it from the lack
