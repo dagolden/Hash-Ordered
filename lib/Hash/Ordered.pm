@@ -183,7 +183,7 @@ sub push {
         push @{ $self->[_KEYS] }, $k;
         $self->[_DATA]{$k} = $v;
     }
-    return scalar $self->keys;
+    return scalar @{ $self->[_KEYS] };
 }
 
 =method pop
@@ -224,7 +224,7 @@ sub unshift {
         unshift @{ $self->[_KEYS] }, $k;
         $self->[_DATA]{$k} = $v;
     }
-    return scalar $self->keys;
+    return scalar @{ $self->[_KEYS] };
 }
 
 =method shift
