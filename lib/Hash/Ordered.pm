@@ -133,7 +133,7 @@ sub delete {
         splice @$r, $i, 1;
         return delete $self->[_DATA]{$key};
     }
-    return undef;
+    return undef; ## no critic
 }
 
 =method push
