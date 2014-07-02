@@ -241,6 +241,28 @@ sub shift {
     return $key, delete $self->[_DATA]{$key};
 }
 
+=method merge
+
+    $oh->merge( one => 1, two => 2 );
+
+Merges a list of key-value pairs into the ordered hash.  If a key already
+exists, its value is replaced.  Otherwise, the key-value pair is added at
+the end of the hash.
+
+=cut
+
+sub merge {
+    my ( $self, @pairs ) = @_;
+    while (@pairs) {
+        my ( $k, $v ) = splice( @pairs, -2, 2 );
+        if ( !exists $self->[_DATA]{$k} ) {
+            CORE::push @{ $self->[_KEYS] }, $k;
+        }
+        $self->[_DATA]{$k} = $v;
+    }
+    return scalar @{ $self->[_KEYS] };
+}
+
 =method as_list
 
     @pairs = $oh->as_list;

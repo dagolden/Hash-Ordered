@@ -141,6 +141,14 @@ subtest "list methods" => sub {
         "hash keys/values correct after unshifting existing key"
     );
 
+    ok( $hash->merge( a => 2, c => 3 ), "merging key-value pairs" );
+
+    cmp_deeply(
+        [ $hash->as_list ],
+        [ z => 26, a => 2, b => 2, c => 3 ],
+        "hash keys/values correct after merging pairs"
+    );
+
 };
 
 done_testing;
