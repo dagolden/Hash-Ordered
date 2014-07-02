@@ -76,7 +76,8 @@ subtest "output and iteration" => sub {
     while ( my ( $k, $v ) = $iter->() ) {
         push @saw, $k, $v;
     }
-    cmp_deeply( [ $hash->as_list ], [ 'a' .. 'z' ], "iterator walked hash in order" );
+    cmp_deeply( [@saw], [ $hash->as_list ], "iterator walked hash in order" )
+      or diag explain \@saw;
 
 };
 
