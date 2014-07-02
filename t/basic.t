@@ -128,6 +128,27 @@ subtest "list methods" => sub {
 
 };
 
+subtest "subset" => sub {
+
+    my $hash = new_ok( HO, [ a => 1, b => 2 ], "new( a => 1, b => 2 )" );
+
+    my $same = $hash->subset( $hash->keys );
+    cmp_deeply( [ $same->as_list ], [ $hash->as_list ], "subset( keys )" );
+
+    my $rev = $hash->subset( reverse $hash->keys );
+    cmp_deeply( [ $rev->as_list ], [ b => 2, a => 1 ], "subset( reverse keys )" );
+
+    my $filter = $hash->subset('a');
+    cmp_deeply( [ $filter->as_list ], [ a => 1 ], "subset( 'a' )" );
+
+    my $extra = $hash->subset( 'a', 'c' );
+    cmp_deeply( [ $filter->as_list ], [ a => 1 ], "subset( 'a', 'c' ) (ignores c)" );
+
+    my $emptyset = $hash->subset();
+    ok( !$emptyset, "subset() is empty" );
+
+};
+
 done_testing;
 
 # vim: ts=4 sts=4 sw=4 et:

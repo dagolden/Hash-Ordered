@@ -51,6 +51,24 @@ sub clone {
     return bless $clone, ref $self;
 }
 
+=method subset
+
+    $oh2 = $oh->subset( @keys );
+
+Creates a shallow copy with only the listed keys in the order provided.  Keys
+that don't exist in the original hash are silently ignored.
+
+=cut
+
+sub subset {
+    my ( $self, @keys ) = @_;
+    my $data = $self->[_DATA];
+    my @subkeys = grep { exists $data->{$_} } @keys;
+    my %subhash;
+    @subhash{@subkeys} = @{$data}{@subkeys};
+    return bless [ \%subhash, \@subkeys ], ref $self;
+}
+
 =method keys
 
     @keys = $oh->keys;
