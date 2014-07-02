@@ -278,23 +278,27 @@ sub as_list {
 
 =method iterator
 
-    $iter = $oh->iterator
+    $iter = $oh->iterator;
+    $iter = $oh->iterator( reverse $oh->keys ); # reverse
 
     while ( my ($key,$value) = $iter->() ) { ... }
 
 Returns a code reference that returns a single key-value pair (in order) on
 each invocation, or the empty list if all keys are visited.
 
-The list of keys to return is set when the iterator is generator.  Keys
-added later will not be returned and keys deleted will be returned with
-C<undef>.
+If no arguments are given, the iterator walks the entire hash in order.  If a
+list of keys is provided, the iterator walks the hash in that order. Unknown
+keys will return C<undef>.
+
+The list of keys to return is set when the iterator is generator.  Keys added
+later will not be returned.  Delete keys will return C<undef>.
 
 =cut
 
 sub iterator {
-    my ($self) = @_;
-    my @keys   = @{ $self->[_KEYS] };
-    my $data   = $self->[_DATA];
+    my ( $self, @keys ) = @_;
+    @keys = @{ $self->[_KEYS] } unless @keys;
+    my $data = $self->[_DATA];
     return sub {
         return unless @keys;
         my $key = CORE::shift(@keys);

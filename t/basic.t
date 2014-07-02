@@ -93,6 +93,16 @@ subtest "output and iteration" => sub {
     cmp_deeply( [@saw], [ $hash->as_list ], "iterator walked hash in order" )
       or diag explain \@saw;
 
+    $iter = $hash->iterator( reverse $hash->keys );
+    @saw  = ();
+    while ( my ( $k, $v ) = $iter->() ) {
+        unshift @saw, $k, $v;
+    }
+    cmp_deeply(
+        [@saw],
+        [ $hash->as_list ],
+        "iterator( reverse keys ) walked hash in expected order"
+    ) or diag explain \@saw;
 };
 
 subtest "list methods" => sub {
