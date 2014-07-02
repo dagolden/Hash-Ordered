@@ -95,6 +95,20 @@ sub values {
     return map { $self->[_DATA]{$_} } @{ $self->[_KEYS] };
 }
 
+=method slice
+
+    @values = $oh->slice( @keys );
+
+Returns a list of values for the ordered list of keys provided.  Unknown keys
+return a value of C<undef>.
+
+=cut
+
+sub slice {
+    my ( $self, @keys ) = @_;
+    return map { $self->[_DATA]{$_} } @keys;
+}
+
 =method exists
 
     if ( $oh->exists("some key") ) { ... }
