@@ -80,10 +80,17 @@ subtest "element methods" => sub {
 subtest "output and iteration" => sub {
 
     my $hash = new_ok( HO, [ 'a' .. 'z' ], "new('a'..'z')" );
+
     cmp_deeply( [ $hash->as_list ], [ 'a' .. 'z' ], "as_list" );
 
-    my @slice = $hash->values(qw/a c g/);
-    cmp_deeply( \@slice, [qw/b d h/], "values( keys )" );
+    cmp_deeply(
+        [ $hash->as_list(qw/a c g zz/) ],
+        [ a => 'b', c => 'd', g => 'h', zz => undef ],
+        "as_list( keys )"
+    );
+
+    my @slice = $hash->values(qw/a c zz g/);
+    cmp_deeply( \@slice, [ 'b', 'd', undef, 'h' ], "values( keys )" );
 
     my $iter = $hash->iterator;
     my @saw;

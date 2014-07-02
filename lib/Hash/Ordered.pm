@@ -266,14 +266,19 @@ sub merge {
 =method as_list
 
     @pairs = $oh->as_list;
+    @pairs = $oh->as_list( @keys );
 
-Returns the ordered list of key-value pairs.
+Returns an ordered list of key-value pairs. If no arguments are given, all
+pairs in the hash are returned.  If a list of keys is given, the returned list
+includes only those key-value pairs in the given order.  Keys that aren't in
+the original will have the value C<undef>.
 
 =cut
 
 sub as_list {
-    my ($self) = @_;
-    return map { ; $_ => $self->[_DATA]{$_} } @{ $self->[_KEYS] };
+    my ( $self, @keys ) = @_;
+    @keys = @{ $self->[_KEYS] } unless @keys;
+    return map { ; $_ => $self->[_DATA]{$_} } @keys;
 }
 
 =method iterator
