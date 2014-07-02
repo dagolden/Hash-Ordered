@@ -338,6 +338,13 @@ sub iterator {
     $iter = $oh->iterator;
     while( ( $k, $v ) = $iter->() ) { ... }
 
+    $copy     = $oh->clone;
+    $subset   = $oh->clone( qw/c d/ );
+    $reversed = $oh->clone( reverse $oh->keys );
+
+    @value_slice = $oh->values(  qw/c f/ ); # qw/3 6/
+    @pairs_slice = $oh->as_list( qw/f e/ ); # qw/f 6 e 5/
+
 =head1 DESCRIPTION
 
 This module implements an ordered hash, meaning that it associates keys with
