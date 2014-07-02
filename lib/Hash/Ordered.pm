@@ -14,6 +14,8 @@ use constant {
     _KEYS => 1,
 };
 
+use overload 'bool' => sub { scalar @{ $_[0]->[_KEYS] } }, fallback => 1;
+
 =method new
 
     $oh = Hash::Ordered->new;
@@ -291,6 +293,15 @@ This module implements an ordered hash, meaning that it associates keys with
 values like a Perl hash, but keeps the keys in a consistent order.  Because it
 is implemented as an object and manipulated with method calls, it is much
 slower than a Perl hash.  This is the cost of keeping order.
+
+=head1 OVERLOADING
+
+=head2 Boolean
+
+    if ( $oh ) { ... }
+
+When used in boolean context, a Hash::Ordered object is true if it has any entries
+and false otherwise.
 
 =head1 MOTIVATION
 

@@ -33,6 +33,15 @@ subtest "constructors" => sub {
 
 };
 
+subtest "boolean" => sub {
+
+    my $hash = new_ok( HO, [], "new()" );
+    ok( !$hash, "empty hash is false" );
+    $hash->set( a => 1 );
+    ok( $hash, "non-empty hash is true" );
+
+};
+
 subtest "element methods" => sub {
 
     my $hash = new_ok( HO, [], "new()" );
