@@ -79,28 +79,18 @@ sub keys {
 =method values
 
     @values = $oh->values;
+    @values = $oh->values( @keys );
 
-Returns the ordered list of values.
+Returns an ordered list of values.  If no arguments are given, returns
+the ordered values of the entire hash.  If a list of keys is given, returns
+values in order corresponding to those keys.  If a key does not exist, C<undef>
+will be returned for that value.
 
 =cut
 
 sub values {
-    my ($self) = @_;
-    return map { $self->[_DATA]{$_} } @{ $self->[_KEYS] };
-}
-
-=method slice
-
-    @values = $oh->slice( @keys );
-
-Returns a list of values for the ordered list of keys provided.  Unknown keys
-return a value of C<undef>.
-
-=cut
-
-sub slice {
     my ( $self, @keys ) = @_;
-    return map { $self->[_DATA]{$_} } @keys;
+    return map { $self->[_DATA]{$_} } ( @keys ? @keys : @{ $self->[_KEYS] } );
 }
 
 =method exists
