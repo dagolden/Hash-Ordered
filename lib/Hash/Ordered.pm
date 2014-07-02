@@ -93,19 +93,6 @@ sub values {
     return map { $self->[_DATA]{$_} } ( @keys ? @keys : @{ $self->[_KEYS] } );
 }
 
-=method exists
-
-    if ( $oh->exists("some key") ) { ... }
-
-Test if some key exists in the hash (without creating it).
-
-=cut
-
-sub exists {
-    my ( $self, $key ) = @_;
-    return exists $self->[_DATA]{$key};
-}
-
 =method get
 
     $value = $oh->get("some key");
@@ -134,6 +121,19 @@ sub set {
         push @{ $self->[_KEYS] }, $key;
     }
     return $self->[_DATA]{$key} = $value;
+}
+
+=method exists
+
+    if ( $oh->exists("some key") ) { ... }
+
+Test if some key exists in the hash (without creating it).
+
+=cut
+
+sub exists {
+    my ( $self, $key ) = @_;
+    return exists $self->[_DATA]{$key};
 }
 
 =method delete
