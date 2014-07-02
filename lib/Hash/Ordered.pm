@@ -208,6 +208,8 @@ Adds a list of key-value pairs to the beginning of the ordered hash.  If a key
 already exists, it will be deleted and re-inserted at the beginning with the
 new value.
 
+Returns the number of keys after the unshift is complete.
+
 =cut
 
 sub unshift {
