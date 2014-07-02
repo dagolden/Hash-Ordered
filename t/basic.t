@@ -29,7 +29,19 @@ subtest "constructors" => sub {
     );
 
     my $clone = $hash->clone;
-    cmp_deeply( $clone, $hash, "clone returns copy" );
+    cmp_deeply( $clone, $hash, "clone() returns copy" );
+
+    my $same = $hash->clone( $hash->keys );
+    cmp_deeply( [ $same->as_list ], [ $hash->as_list ], "clone( keys )" );
+
+    my $rev = $hash->clone( reverse $hash->keys );
+    cmp_deeply( [ $rev->as_list ], [ b => 2, a => 1 ], "clone( reverse keys )" );
+
+    my $filter = $hash->clone('a');
+    cmp_deeply( [ $filter->as_list ], [ a => 1 ], "clone( 'a' )" );
+
+    my $extra = $hash->clone( 'c', 'a' );
+    cmp_deeply( [ $extra->as_list ], [ c => undef, a => 1 ], "clone( 'c', 'a' )" );
 
 };
 
@@ -128,27 +140,6 @@ subtest "list methods" => sub {
         [ z => 26, a => 1, b => 2 ],
         "hash keys/values correct after unshifting existing key"
     );
-
-};
-
-subtest "subset" => sub {
-
-    my $hash = new_ok( HO, [ a => 1, b => 2 ], "new( a => 1, b => 2 )" );
-
-    my $same = $hash->subset( $hash->keys );
-    cmp_deeply( [ $same->as_list ], [ $hash->as_list ], "subset( keys )" );
-
-    my $rev = $hash->subset( reverse $hash->keys );
-    cmp_deeply( [ $rev->as_list ], [ b => 2, a => 1 ], "subset( reverse keys )" );
-
-    my $filter = $hash->subset('a');
-    cmp_deeply( [ $filter->as_list ], [ a => 1 ], "subset( 'a' )" );
-
-    my $extra = $hash->subset( 'a', 'c' );
-    cmp_deeply( [ $filter->as_list ], [ a => 1 ], "subset( 'a', 'c' ) (ignores c)" );
-
-    my $emptyset = $hash->subset();
-    ok( !$emptyset, "subset() is empty" );
 
 };
 

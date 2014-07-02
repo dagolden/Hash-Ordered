@@ -40,33 +40,27 @@ sub new {
 =method clone
 
     $oh2 = $oh->clone;
+    $oh2 = $oh->clone( @keys );
 
-Creates a shallow copy of another object.
+Creates a shallow copy of an ordered hash object.  If no arguments are
+given, it produces an exact copy.  If a list of keys is given, the new
+object includes only those keys in the given order.  Keys that aren't
+in the original will have the value C<undef>.
 
 =cut
 
 sub clone {
-    my ($self) = @_;
-    my $clone = [ { %{ $self->[_DATA] } }, [ @{ $self->[_KEYS] } ] ];
-    return bless $clone, ref $self;
-}
-
-=method subset
-
-    $oh2 = $oh->subset( @keys );
-
-Creates a shallow copy with only the listed keys in the order provided.  Keys
-that don't exist in the original hash are silently ignored.
-
-=cut
-
-sub subset {
     my ( $self, @keys ) = @_;
-    my $data = $self->[_DATA];
-    my @subkeys = grep { exists $data->{$_} } @keys;
-    my %subhash;
-    @subhash{@subkeys} = @{$data}{@subkeys};
-    return bless [ \%subhash, \@subkeys ], ref $self;
+    my $clone;
+    if (@keys) {
+        my %subhash;
+        @subhash{@keys} = @{ $self->[_DATA] }{@keys};
+        $clone = [ \%subhash, \@keys ];
+    }
+    else {
+        $clone = [ { %{ $self->[_DATA] } }, [ @{ $self->[_KEYS] } ] ];
+    }
+    return bless $clone, ref $self;
 }
 
 =method keys
