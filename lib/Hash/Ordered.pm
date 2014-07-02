@@ -27,6 +27,9 @@ Constructs an object, with an optional list of key-value pairs.
 
 sub new {
     my ( $class, @pairs ) = @_;
+
+    return bless [ {}, [] ], $class unless @pairs;
+
     Carp::croak("new() requires key-value pairs") unless @pairs % 2 == 0;
 
     my $self = [ {@pairs}, [ map { $_ % 2 == 0 ? ( $pairs[$_] ) : () } 0 .. $#pairs ] ];
