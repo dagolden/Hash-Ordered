@@ -2,6 +2,10 @@ Revision history for Hash-Ordered
 
 {{$NEXT}}
 
+    [Documented]
+
+    - Added Hash::Ordered::Benchmarks
+
 0.001     2014-07-02 18:37:27-04:00 America/New_York
 
     - First release

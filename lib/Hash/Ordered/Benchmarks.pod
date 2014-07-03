@@ -1,0 +1,382 @@
+# PODNAME: Hash::Ordered::Benchmarks
+# ABSTRACT: Ordered hash benchmarking
+
+=head1 INTRODUCTION
+
+The L<Hash::Ordered> internals are simple: a hash of data and an array of
+ordered keys.  I thought this would perform well for common tasks and
+likely outperform more complicated ordered hash implementations, so I
+decided to do some benchmarking to test it.
+
+In my review of alternatives to C<Hash::Ordered>, six seemed sufficiently
+general-purpose to be worth benchmarking.  The modules tested are listed in
+the benchmark output in shorthand:
+
+=for :list
+* L<Array::AsHash> — denoted C<a:ah>
+* L<Array::OrdHash> — denoted C<a:oh>
+* L<Data::XHash> — denoted C<d:xh>
+* L<Hash::Ordered> — denoted C<h:o>
+* L<Tie::Hash::Indexed> — denoted C<t:h:i>
+* L<Tie::IxHash> — denoted C<t:ix>
+* L<Tie::LLHash> — denoted C<t:llh>
+
+Note that L<Tie::Hash::Indexed> is written in XS and also may require
+forced installation as its tests often fail for Perl 5.18+ due to the
+hash randomization change.
+
+If there are different methods of doing something with a module, the
+variations are described in each section below.
+
+=head1 BENCHMARKS
+
+I conducted benchmarking with the L<Benchmark> module.  The test script is
+in the C<devel> directory of the distribution.  Tests were run on Perl
+5.21.0 (essentially the same as 5.20.0) on a Mac Book Pro.  Each benchmark
+ran for 5 CPU seconds.
+
+Benchmarks were run at several different scales to reveal differences in
+efficiency as hash size grows.  The details are described in each section
+below.
+
+A seed list of keys and values was generated from random integers
+using L<Math::Random::MT::Auto>.  The same seed list was used for
+all benchmarks unless otherwise noted.
+
+I did not test advanced features of these modules, as apples-to-apples
+comparison is difficult.  Still, the performance on common, simple measures
+could suggest how features that combine these operations might perform.
+
+=head2 Ordered hash creation
+
+I tested hash creation for 10, 100 and 1000 elements.  For some modules
+there were different options for creating a hash:
+
+=for :list
+* C<Array::AsHash> takes an array-reference with an option to use it directly
+  or to clone it.  In one case I provided the seed list array reference
+  with the clone option to true ("a:ah_cp").  In another case I created a
+  new array reference from the seed list and provided it directly
+  ("a:ah_rf").
+* C<Tie::IxHash> can be initialized either with C<new> ("t:ix_oo") or via
+  C<tie> ("t:ix_th").
+* C<Data::XHash> can be created with a list ("t:xh_ls") or an array
+  reference ("t:xh_rf").
+
+As expected, when C<Array::AsHash> gets an array reference, it's very fast.
+C<Tie::Hash::Indexed> does well here, also.  Of the non-XS, more hash-like
+choices, C<Hash::Ordered> does well.
+
+    Results for ordered hash creation for 10 elements
+               t:h:i 129713/s
+             a:ah_rf 104034/s
+                 h:o 94121/s
+             a:ah_cp 62539/s
+             t:ix_th 60136/s
+             t:ix_oo 59895/s
+                a:oh 49399/s
+               t:llh 32122/s
+             d:xh_rf 13288/s
+             d:xh_ls 13223/s
+
+    Results for ordered hash creation for 100 elements
+               t:h:i 15026/s
+             a:ah_rf 14304/s
+                 h:o 10931/s
+             a:ah_cp 7512/s
+             t:ix_oo 7368/s
+             t:ix_th 7161/s
+                a:oh 6572/s
+               t:llh 3306/s
+             d:xh_ls 1498/s
+             d:xh_rf 1491/s
+
+    Results for ordered hash creation for 1000 elements
+             a:ah_rf 1410/s
+               t:h:i 1285/s
+                 h:o 1022/s
+             a:ah_cp 763/s
+             t:ix_oo 703/s
+             t:ix_th 697/s
+                a:oh 694/s
+               t:llh 290/s
+             d:xh_rf 147/s
+             d:xh_ls 146/s
+
+=head2 Getting hash elements
+
+I tested retrieving values for 10% of the keys, randomly selected, from
+hashes of 10, 100 and 1000 elements.  The hash was created beforehand so
+the benchmarks reflect only element access.
+
+Some modules had choices for how to retrieve an value, usually between a
+method (denoted with "_oo"), tied hash access ("_th") or with a dereference
+("_rf").
+
+Generally, method calls turned out faster than other approaches for a given
+module, demonstrating the inefficiency of tied objects.
+
+    Results for fetching ~10% of 10 elements
+                 h:o 1417712/s
+             d:xh_oo 1231973/s
+             t:ix_oo 1120271/s
+               t:h:i 792250/s
+             d:xh_rf 722683/s
+             t:ix_th 624603/s
+                a:oh 553755/s
+               t:llh 504533/s
+                a:ah 246063/s
+
+    Results for fetching ~10% of 100 elements
+                 h:o 244800/s
+             d:xh_oo 181520/s
+             t:ix_oo 175981/s
+               t:h:i 132963/s
+             d:xh_rf 93519/s
+             t:ix_th 82154/s
+                a:oh 68270/s
+               t:llh 57013/s
+                a:ah 28280/s
+
+    Results for fetching ~10% of 1000 elements
+                 h:o 24871/s
+             d:xh_oo 19125/s
+             t:ix_oo 17655/s
+               t:h:i 13407/s
+             d:xh_rf 9590/s
+             t:ix_th 8455/s
+                a:oh 6995/s
+               t:llh 5781/s
+                a:ah 2219/s
+
+
+=head2 Setting hash elements
+
+I tested changing values for 10% of the keys, randomly selected, from
+hashes of 10, 100 and 1000 elements.  The hash was created beforehand so
+the benchmarks reflect only element mutation.  No new keys were added.
+
+Some modules had choices for how to modify a value, usually between a
+method (denoted with "_oo"), tied hash access ("_th") or with a dereference
+("_rf").
+
+Again, methods outperformed.
+
+    Results for replacing ~10% of 10 elements
+                 h:o 1353795/s
+             d:xh_oo 952485/s
+               t:h:i 943983/s
+             t:ix_oo 923874/s
+               t:llh 600717/s
+             d:xh_rf 568693/s
+                a:oh 547233/s
+             t:ix_th 519939/s
+                a:ah 164170/s
+
+    Results for replacing ~10% of 100 elements
+                 h:o 197232/s
+               t:h:i 131238/s
+             d:xh_oo 121692/s
+             t:ix_oo 114869/s
+               t:llh 71720/s
+             d:xh_rf 67130/s
+                a:oh 63634/s
+             t:ix_th 59784/s
+                a:ah 16843/s
+
+    Results for replacing ~10% of 1000 elements
+                 h:o 20364/s
+               t:h:i 13254/s
+             d:xh_oo 12512/s
+             t:ix_oo 11542/s
+               t:llh 7295/s
+             d:xh_rf 7004/s
+                a:oh 6376/s
+             t:ix_th 6175/s
+                a:ah 1635/s
+
+
+=head2 Adding hash elements
+
+I tested adding 10, 100 and 1000 elements to an empty hash.
+
+Some modules had choices for how to append a value, usually between a
+method (denoted with "_oo"), tied hash access ("_th") or with a dereference
+("_rf").
+
+For C<Tie::LLHash>, I did not use the "lazy" option, but did the equivalent
+using C<tied> and a method call:
+
+        tied(%tllh)->last( irand(), 42 ) for 1 .. $n;
+
+Generally, it seemed like the differences were smaller than for other
+benchmarks.  Methods still outperformed.
+
+    Results for adding 10 elements to empty hash
+                 h:o 367588/s
+               t:h:i 300357/s
+             t:ix_oo 263158/s
+             t:ix_th 214085/s
+               t:llh 187981/s
+                a:oh 141308/s
+                a:ah 96523/s
+             d:xh_oo 87498/s
+             d:xh_rf 84316/s
+
+    Results for adding 100 elements to empty hash
+                 h:o 66495/s
+               t:h:i 57307/s
+             t:ix_oo 49676/s
+             t:ix_th 38222/s
+                a:oh 35476/s
+               t:llh 27998/s
+             d:xh_oo 24371/s
+             d:xh_rf 22326/s
+                a:ah 14114/s
+
+    Results for adding 1000 elements to empty hash
+                 h:o 7217/s
+               t:h:i 6244/s
+             t:ix_oo 5671/s
+                a:oh 4335/s
+             t:ix_th 4313/s
+             d:xh_oo 2977/s
+               t:llh 2899/s
+             d:xh_rf 2683/s
+                a:ah 1466/s
+
+
+=head2 Deleting hash elements
+
+I tested creating hashes of 10, 100 and 1000 elements and then deleting
+10% of the keys, chosen randomly.  I would have liked to have isolated
+creation from deletion, but I couldn't figure out a way to do that given
+how C<Benchmark> runs the same tests over and over.
+
+Some modules had choices for how to delete a value, usually between a
+method (denoted with "_oo"), tied hash access ("_th") or with a dereference
+("_rf").
+
+Interestingly, the performance of different modules changes a lot at the
+three different sizes, revealing implementation differences.  (Though
+recall that some of this is the creation performance difference as well as
+deletion difference.)
+
+For example, C<Tie::Hash::Indexed> XS does very well, which could be its
+good creation performance, but could also be good deletion.
+C<Hash::Ordered> does linear search deleting a key, which is slow at larger
+sizes.  C<Tie::LLHash> really shines at larger sizes as deleting from a
+linked list is faster than splicing out an element of an array.
+
+    Results for creating 10 element hash then deleting ~10%
+               t:h:i 139517/s
+                 h:o 95284/s
+                a:ah 66495/s
+             t:ix_oo 52892/s
+             t:ix_th 50254/s
+                a:oh 45609/s
+               t:llh 28599/s
+             d:xh_rf 13223/s
+             d:xh_oo 13173/s
+
+    Results for creating 100 element hash then deleting ~10%
+               t:h:i 16745/s
+                 h:o 6924/s
+             t:ix_oo 4063/s
+                a:oh 3963/s
+             t:ix_th 3590/s
+                a:ah 3014/s
+               t:llh 2459/s
+             d:xh_oo 1449/s
+             d:xh_rf 1434/s
+
+    Results for creating 1000 element hash then deleting ~10%
+               t:h:i 1604/s
+               t:llh 269/s
+                a:oh 171/s
+             d:xh_rf 146/s
+                 h:o 144/s
+             d:xh_oo 130/s
+             t:ix_oo 85/s
+             t:ix_th 77/s
+                a:ah 36/s
+
+
+=head2 Extracting the hash as a list
+
+I tested getting an ordered list of pairs from hashes of 10, 100 and 1000
+elements.  The hash was created beforehand so the benchmarks reflect only
+conversion to a list.
+
+Oddly, modules that usually have more than one way to do this don't for
+this.  Even C<Tie::IxHash> doesn't really have an OO way to do it, so I did
+it longhand:
+
+        @list = map { $_ => $tix_oo->FETCH($_) } $tix_oo->Keys;
+
+Because C<Array::AsHash> keeps its internal representation as an ordered
+list of pairs, it outperforms the rest handily.
+
+    Results for listing pairs of 10 element hash
+                a:ah 290725/s
+                 h:o 170187/s
+             t:ix_oo 92118/s
+               t:h:i 80408/s
+             t:ix_th 48756/s
+               t:llh 38509/s
+                a:oh 36126/s
+                d:xh 35766/s
+
+    Results for listing pairs of 100 element hash
+                a:ah 39222/s
+                 h:o 18839/s
+             t:ix_oo 9525/s
+               t:h:i 7742/s
+                a:oh 5081/s
+             t:ix_th 5014/s
+                d:xh 4160/s
+               t:llh 3841/s
+
+    Results for listing pairs of 1000 element hash
+                a:ah 3703/s
+                 h:o 1877/s
+             t:ix_oo 961/s
+               t:h:i 768/s
+                a:oh 508/s
+             t:ix_th 505/s
+                d:xh 413/s
+               t:llh 385/s
+
+=head1 CONCLUSION
+
+With the exception of hash creation and element deletion, C<Hash::Ordered>
+consistently outperformed the other ordered hash implementations.  Even for
+creation, it was the fastest of the pure-Perl, hash-based implementations,
+often by a large margin.
+
+However, C<Hash::Ordered> deletion gets worse as the hash size grows large.
+This was an intentional trade-off, as keeping an index of keys to allow
+faster deletion would slow down other operations.  I think large-scale key
+deletion is probably rare in practice, but frequently using the C<push> or
+C<unshift> methods on existing keys to move them to the end/start of the
+list will have similar performance problems.
+
+C<Array::AsHash>, with the opposite internal implementation compared to
+C<Hash::Ordered>, performs best at creation and listing pairs, but is dead
+last at element access and modification.  I believe the poor performance is
+mostly due to extra indirection (e.g. an extra function call) and logic in
+the element access methods.  For uses that don't require much element
+access and have lots of creation/serialization, it could still be a useful
+choice.
+
+Generally, every module that depends on C<tie> for some portion of its
+implementation pays a substantial performance penalty.
+C<Tie::Hash::Indexed> — likely because of its XS implementation — performs
+decently, but not well enough in my opinion to justify its use.
+
+As the author of C<Hash::Ordered>, I'm clearly biased, but unless you have
+very large hashes with lots of deletes, I think these benchmarks make a
+very good case for it being the "go to" module for general-purpose ordered
+hashes.
+
+=cut
