@@ -386,11 +386,14 @@ API.
 
 =head1 SEE ALSO
 
+This section describes modules that do something similar.  For benchmarking
+results, see L<Hash::Ordered::Benchmarks>.
+
 =head2 Tie modules
 
 The following modules offer some sort of tie interface.  I don't like ties, in
 general, because of the extra indirection involved over a direct method call, but
-if that doesn't bother you, you might want to try one of these
+if that doesn't bother you, you might want to try one of these:
 
 L<Tie::IxHash> is probably the most well known and includes an OO API.  If its
 warts and performance profile aren't a problem, it might serve.
@@ -399,8 +402,8 @@ L<Tie::LLHash> I haven't used, but the linked-list implementation might be
 worthwhile if you expect to do a lot of deletions.
 
 L<Tie::Hash::Indexed> is implemented in XS and thus seems promising if pure-Perl
-isn't a criterion, but last I looked, it had a lot of CPAN Testers failures,
-which lowers my trust in it.
+isn't a criterion; it often fails tests on Perl 5.18 and above due to the hash
+randomization change.
 
 These other modules have very specific designs/limitations and I didn't find
 any of them suitable for general purpose use:
@@ -426,7 +429,7 @@ access.
 
 These other modules have restrictions or particularly complicated
 implementations (often relying on C<tie>) and thus I didn't think any of them
-suitable for general purpose use:
+really suitable for use:
 
 =for :list
 * L<Array::Assign> — arrays with named access; restricted keys
