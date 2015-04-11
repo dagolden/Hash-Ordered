@@ -158,6 +158,23 @@ sub delete {
     return undef; ## no critic
 }
 
+=method clear
+
+    $oh->clear;
+
+Removes all key-value pairs from the hash.
+Returns C<undef>.
+
+=cut
+
+sub clear {
+    my $self = shift;
+    %{ $self->[_DATA] } = ();
+    @{ $self->[_KEYS] } = ();
+    # XXX: should it return $self ?
+    return undef; ## no critic
+}
+
 =method push
 
     $oh->push( one => 1, two => 2);
