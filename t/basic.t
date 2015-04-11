@@ -112,6 +112,17 @@ subtest "output and iteration" => sub {
     ) or diag explain \@saw;
 };
 
+subtest "clear" => sub {
+
+    my $hash = new_ok( HO, [ 'a' .. 'f' ], "new('a'..'f')" );
+
+    cmp_deeply( [ $hash->as_list ], [ 'a' .. 'f' ], "as_list returns non-empty list" );
+    is( $hash->clear, undef, "clearing hash returns undef" );
+    cmp_deeply( [ $hash->as_list ], [], "as_list returns empty list" );
+    cmp_deeply( $hash, HO->new, "cleared hash and new empty hash are equal" );
+
+};
+
 subtest "list methods" => sub {
 
     my $hash = new_ok( HO, [ a => 1 ], "new( a => 1 )" );

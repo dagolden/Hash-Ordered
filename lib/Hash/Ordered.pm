@@ -161,6 +161,24 @@ sub delete {
     return undef; ## no critic
 }
 
+=method clear
+
+    $oh->clear;
+
+Removes all key-value pairs from the hash.  Returns undef in scalar context
+or an empty list in list context.
+
+Added in version 0.003.
+
+=cut
+
+sub clear {
+    my ($self) = @_;
+    %{ $self->[_DATA] } = ();
+    @{ $self->[_KEYS] } = ();
+    return;
+}
+
 =method push
 
     $oh->push( one => 1, two => 2);
