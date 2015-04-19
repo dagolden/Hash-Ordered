@@ -4,7 +4,8 @@ use warnings;
 
 package Hash::Ordered;
 # ABSTRACT: A compact, pure-Perl ordered hash class
-# VERSION
+
+our $VERSION = '0.003';
 
 use Carp ();
 
