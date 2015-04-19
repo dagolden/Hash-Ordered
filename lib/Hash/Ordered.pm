@@ -7,7 +7,6 @@ package Hash::Ordered;
 # VERSION
 
 use Carp ();
-use List::Util 1.09 ();
 
 use constant {
     _DATA => 0,
@@ -151,7 +150,10 @@ sub delete {
     if ( exists $self->[_DATA]{$key} ) {
         # XXX could put an index on this later if linear search is too slow
         my $r = $self->[_KEYS];
-        my $i = List::Util::first { $r->[$_] eq $key } 0 .. $#$r;
+        my $i;
+        for ( 0 .. $#$r ) {
+            if ( $r->[$_] eq $key ) { $i = $_; last; }
+        }
         splice @$r, $i, 1;
         return delete $self->[_DATA]{$key};
     }
@@ -176,9 +178,11 @@ sub push {
         my ( $k, $v ) = splice( @pairs, 0, 2 );
         if ( exists $self->[_DATA]{$k} ) {
             # splice out key
-            # XXX could put an index on this later if linear search is too slow
             my $r = $self->[_KEYS];
-            my $i = List::Util::first { $r->[$_] eq $k } 0 .. $#$r;
+            my $i;
+            for ( 0 .. $#$r ) {
+                if ( $r->[$_] eq $k ) { $i = $_; last; }
+            }
             splice @$r, $i, 1;
         }
         push @{ $self->[_KEYS] }, $k;
@@ -219,9 +223,11 @@ sub unshift {
         my ( $k, $v ) = splice( @pairs, -2, 2 );
         if ( exists $self->[_DATA]{$k} ) {
             # splice out key
-            # XXX could put an index on this later if linear search is too slow
             my $r = $self->[_KEYS];
-            my $i = List::Util::first { $r->[$_] eq $k } 0 .. $#$r;
+            my $i;
+            for ( 0 .. $#$r ) {
+                if ( $r->[$_] eq $k ) { $i = $_; last; }
+            }
             splice @$r, $i, 1;
         }
         unshift @{ $self->[_KEYS] }, $k;
