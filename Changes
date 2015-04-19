@@ -2,6 +2,14 @@ Revision history for Hash-Ordered
 
 {{$NEXT}}
 
+    [Added]
+
+    - Added 'clear' method for efficient clearing.
+
+    [Optimized]
+
+    - Replaced use of List::Util::first to speed up element removal.
+
 0.002     2014-07-05 14:00:24-04:00 America/New_York
 
     [Documented]
