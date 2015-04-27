@@ -12,9 +12,33 @@ use Carp ();
 use constant {
     _DATA => 0,
     _KEYS => 1,
+    _INDX => 2,
+    _OFFS => 3,
+    _GCNT => 4, # garbage count
 };
 
-use overload 'bool' => sub { scalar @{ $_[0]->[_KEYS] } }, fallback => 1;
+use constant {
+    _INDEX_THRESHOLD => 25,
+    _TOMBSTONE       => \1,
+};
+
+# 'overloading.pm' not available until 5.10.1 so emulate with Scalar::Util
+BEGIN {
+    if ( 0 && $] gt '5.010000' ) {
+        eval q/sub _stringify { no overloading; "$_[0]" }/;
+        die $@ if $@;
+    }
+    else {
+        eval
+          q/require Scalar::Util; sub _stringify { sprintf("%s=ARRAY(0x%x)",ref($_[0]),Scalar::Util::refaddr($_[0])) }/;
+        die $@ if $@;
+    }
+}
+
+use overload
+  q{""}    => \&_stringify,
+  'bool'   => sub { @{ $_[0]->[_KEYS] } - $_[0]->[_GCNT] },
+  fallback => 1;
 
 =method new
 
@@ -28,11 +52,15 @@ Constructs an object, with an optional list of key-value pairs.
 sub new {
     my ( $class, @pairs ) = @_;
 
-    return bless [ {}, [] ], $class unless @pairs;
+    return bless [ {}, [], undef, 0, 0 ], $class unless @pairs;
 
     Carp::croak("new() requires key-value pairs") unless @pairs % 2 == 0;
 
-    my $self = [ {@pairs}, [ map { $_ % 2 == 0 ? ( $pairs[$_] ) : () } 0 .. $#pairs ] ];
+    # must stringify keys for _KEYS array
+    my $self = [
+        {@pairs}, [ map { $_ % 2 == 0 ? ("$pairs[$_]") : () } 0 .. $#pairs ],
+        undef, 0, 0
+    ];
 
     return bless $self, $class;
 }
@@ -50,15 +78,22 @@ in the original will have the value C<undef>.
 =cut
 
 sub clone {
-    my ( $self, @keys ) = @_;
+    my $self = shift;
+    my @keys = map { "$_" } @_; # stringify keys
     my $clone;
     if (@keys) {
         my %subhash;
         @subhash{@keys} = @{ $self->[_DATA] }{@keys};
-        $clone = [ \%subhash, \@keys ];
+        $clone = [ \%subhash, \@keys, undef, 0, 0 ];
+    }
+    elsif ( $self->[_INDX] ) {
+        $clone =
+          [ { %{ $self->[_DATA] } }, [ grep !ref($_), @{ $self->[_KEYS] } ], undef, 0, 0 ];
     }
     else {
-        $clone = [ { %{ $self->[_DATA] } }, [ @{ $self->[_KEYS] } ] ];
+        $clone =
+          [ { %{ $self->[_DATA] } }, [ @{ $self->[_KEYS] } ], undef, 0, 0 ];
+
     }
     return bless $clone, ref $self;
 }
@@ -73,7 +108,7 @@ Returns the ordered list of keys.
 
 sub keys {
     my ($self) = @_;
-    return @{ $self->[_KEYS] };
+    return grep !ref($_), @{ $self->[_KEYS] };
 }
 
 =method values
@@ -90,7 +125,8 @@ will be returned for that value.
 
 sub values {
     my ( $self, @keys ) = @_;
-    return map { $self->[_DATA]{$_} } ( @keys ? @keys : @{ $self->[_KEYS] } );
+    return
+      map { $self->[_DATA]{$_} } ( @keys ? @keys : grep !ref($_), @{ $self->[_KEYS] } );
 }
 
 =method get
@@ -119,7 +155,8 @@ already exist in the hash, it will be added at the end.
 sub set {
     my ( $self, $key, $value ) = @_;
     if ( !exists $self->[_DATA]{$key} ) {
-        push @{ $self->[_KEYS] }, $key;
+        my $size = push @{ $self->[_KEYS] }, "$key"; # stringify key
+        $self->[_INDX]{$key} = $size - 1 if $self->[_INDX];
     }
     return $self->[_DATA]{$key} = $value;
 }
@@ -149,13 +186,52 @@ is expensive, as the ordered list of keys has to be updated.
 sub delete {
     my ( $self, $key ) = @_;
     if ( exists $self->[_DATA]{$key} ) {
-        # XXX could put an index on this later if linear search is too slow
-        my $r = $self->[_KEYS];
-        my $i;
-        for ( 0 .. $#$r ) {
-            if ( $r->[$_] eq $key ) { $i = $_; last; }
+        my $keys = $self->[_KEYS];
+
+        # JIT an index if hash is "large"
+        if ( !$self->[_INDX] && @$keys > _INDEX_THRESHOLD ) {
+            my %indx;
+            $indx{ $keys->[$_] } = $_ for 0 .. $#{$keys};
+            $self->[_INDX] = \%indx;
         }
-        splice @$r, $i, 1;
+
+        if ( $self->[_INDX] ) {
+
+            # tombstone
+            $keys->[ delete( $self->[_INDX]{$key} ) + $self->[_OFFS] ] = _TOMBSTONE;
+
+            # GC keys and remove index if more than half keys are tombstone.
+            # Index will be recreated if needed on next delete
+            if ( ++$self->[_GCNT] > @$keys / 2 ) {
+                @{ $self->[_KEYS] } = grep !ref($_), @{ $self->[_KEYS] };
+                $self->[_INDX] = undef;
+                $self->[_OFFS] = 0;
+                $self->[_GCNT] = 0;
+            }
+            # or maybe garbage collect start of list
+            elsif ( ref( $keys->[0] ) ) {
+                my $i = 0;
+                $i++ while ( $i <= $#{$keys} && ref( $keys->[$i] ) );
+                splice @$keys, 0, $i;
+                $self->[_GCNT] -= $i;
+                $self->[_OFFS] -= $i;
+            }
+            # or maybe garbage collect end of list
+            elsif ( ref( $keys->[-1] ) ) {
+                my $i = $#{$keys};
+                $i-- while ( $i >= 0 && ref( $keys->[$i] ) );
+                $self->[_GCNT] -= $#{$keys} - $i;
+                splice @$keys, $i + 1;
+            }
+        }
+        else {
+            my $i;
+            for ( 0 .. $#{$keys} ) {
+                if ( $keys->[$_] eq $key ) { $i = $_; last; }
+            }
+            splice @$keys, $i, 1;
+        }
+
         return delete $self->[_DATA]{$key};
     }
     return undef; ## no critic
@@ -174,8 +250,7 @@ Added in version 0.003.
 
 sub clear {
     my ($self) = @_;
-    %{ $self->[_DATA] } = ();
-    @{ $self->[_KEYS] } = ();
+    @$self = ( {}, [], undef, 0, 0 );
     return;
 }
 
@@ -195,19 +270,12 @@ sub push {
     my ( $self, @pairs ) = @_;
     while (@pairs) {
         my ( $k, $v ) = splice( @pairs, 0, 2 );
-        if ( exists $self->[_DATA]{$k} ) {
-            # splice out key
-            my $r = $self->[_KEYS];
-            my $i;
-            for ( 0 .. $#$r ) {
-                if ( $r->[$_] eq $k ) { $i = $_; last; }
-            }
-            splice @$r, $i, 1;
-        }
-        push @{ $self->[_KEYS] }, $k;
+        $self->delete($k) if exists $self->[_DATA]{$k};
         $self->[_DATA]{$k} = $v;
+        my $size = push @{ $self->[_KEYS] }, "$k"; # stringify keys
+        $self->[_INDX]{$k} = $size - 1 if $self->[_INDX];
     }
-    return scalar @{ $self->[_KEYS] };
+    return @{ $self->[_KEYS] } - $self->[_GCNT];
 }
 
 =method pop
@@ -220,8 +288,8 @@ Removes and returns the last key-value pair in the ordered hash.
 
 sub pop {
     my ($self) = @_;
-    my $key = pop @{ $self->[_KEYS] };
-    return $key, delete $self->[_DATA]{$key};
+    my $key = $self->[_KEYS][-1];
+    return $key, $self->delete($key);
 }
 
 =method unshift
@@ -241,18 +309,15 @@ sub unshift {
     while (@pairs) {
         my ( $k, $v ) = splice( @pairs, -2, 2 );
         if ( exists $self->[_DATA]{$k} ) {
-            # splice out key
-            my $r = $self->[_KEYS];
-            my $i;
-            for ( 0 .. $#$r ) {
-                if ( $r->[$_] eq $k ) { $i = $_; last; }
-            }
-            splice @$r, $i, 1;
+            $self->delete($k);
         }
-        unshift @{ $self->[_KEYS] }, $k;
+        unshift @{ $self->[_KEYS] }, "$k"; # stringify keys
         $self->[_DATA]{$k} = $v;
+        if ( $self->[_INDX] ) {
+            $self->[_INDX]{$k} = -( ++$self->[_OFFS] );
+        }
     }
-    return scalar @{ $self->[_KEYS] };
+    return @{ $self->[_KEYS] } - $self->[_GCNT];
 }
 
 =method shift
@@ -265,8 +330,8 @@ Removes and returns the first key-value pair in the ordered hash.
 
 sub shift {
     my ($self) = @_;
-    my $key = shift @{ $self->[_KEYS] };
-    return $key, delete $self->[_DATA]{$key};
+    my $key = $self->[_KEYS][0];
+    return $key, $self->delete($key);
 }
 
 =method merge
@@ -284,11 +349,12 @@ sub merge {
     while (@pairs) {
         my ( $k, $v ) = splice( @pairs, -2, 2 );
         if ( !exists $self->[_DATA]{$k} ) {
-            CORE::push @{ $self->[_KEYS] }, $k;
+            my $size = CORE::push @{ $self->[_KEYS] }, "$k"; # stringify key
+            $self->[_INDX]{$k} = $size - 1 if $self->[_INDX];
         }
         $self->[_DATA]{$k} = $v;
     }
-    return scalar @{ $self->[_KEYS] };
+    return @{ $self->[_KEYS] } - $self->[_GCNT];
 }
 
 =method as_list
@@ -305,7 +371,7 @@ the original will have the value C<undef>.
 
 sub as_list {
     my ( $self, @keys ) = @_;
-    @keys = @{ $self->[_KEYS] } unless @keys;
+    @keys = grep !ref($_), @{ $self->[_KEYS] } unless @keys;
     return map { ; $_ => $self->[_DATA]{$_} } @keys;
 }
 
@@ -330,7 +396,7 @@ later will not be returned.  Delete keys will return C<undef>.
 
 sub iterator {
     my ( $self, @keys ) = @_;
-    @keys = @{ $self->[_KEYS] } unless @keys;
+    @keys = grep !ref($_), @{ $self->[_KEYS] } unless @keys;
     my $data = $self->[_DATA];
     return sub {
         return unless @keys;

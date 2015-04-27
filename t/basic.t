@@ -75,6 +75,15 @@ subtest "element methods" => sub {
     cmp_deeply( [ $hash->keys ],   [qw/b c/], "keys ordered as expected" );
     cmp_deeply( [ $hash->values ], [qw/2 3/], "values ordered as expected" );
 
+    {
+        my @warnings;
+        local $SIG{__WARN__} = sub { push @warnings, @_; return };
+        $hash->set( undef, 42 );
+        is( $hash->get(undef), 42, "undef is an acceptable key" );
+        for (@warnings) {
+            like( $_, qr/uninitialized value/, "undef warning" );
+        }
+    }
 };
 
 subtest "output and iteration" => sub {
