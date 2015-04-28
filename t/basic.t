@@ -28,20 +28,28 @@ subtest "constructors" => sub {
         "unbalanced args throws exception"
     );
 
-    my $clone = $hash->clone;
-    cmp_deeply( $clone, $hash, "clone() returns copy" );
+    for my $size ( 10, 1000 ) {
 
-    my $same = $hash->clone( $hash->keys );
-    cmp_deeply( [ $same->as_list ], [ $hash->as_list ], "clone( keys )" );
+        $hash = new_ok( HO, [ 1 .. $size * 2 ] );
+        $hash->delete(3); # trigger tombstone on large hash
 
-    my $rev = $hash->clone( reverse $hash->keys );
-    cmp_deeply( [ $rev->as_list ], [ b => 2, a => 1 ], "clone( reverse keys )" );
+        my $clone = $hash->clone;
+        cmp_deeply( [ $clone->as_list ], [ $hash->as_list ], "clone() returns copy" );
 
-    my $filter = $hash->clone('a');
-    cmp_deeply( [ $filter->as_list ], [ a => 1 ], "clone( 'a' )" );
+        my $same = $hash->clone( $hash->keys );
+        cmp_deeply( [ $same->as_list ], [ $hash->as_list ], "clone( keys )" );
 
-    my $extra = $hash->clone( 'c', 'a' );
-    cmp_deeply( [ $extra->as_list ], [ c => undef, a => 1 ], "clone( 'c', 'a' )" );
+        my $rev = $hash->clone( reverse $hash->keys );
+        my $expected = [ map { $_ => $hash->get($_) } reverse $hash->keys ];
+        cmp_deeply( [ $rev->as_list ], $expected, "clone( reverse keys )" );
+
+        my $filter = $hash->clone('5');
+        cmp_deeply( [ $filter->as_list ], [ 5 => 6 ], "clone( '5' )" );
+
+        my $extra = $hash->clone( 'c', '1' );
+        cmp_deeply( [ $extra->as_list ], [ c => undef, 1 => 2 ], "clone( 'c', '1' )" );
+
+    }
 
 };
 
