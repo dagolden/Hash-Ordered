@@ -566,6 +566,11 @@ Hash::Ordered attempts to find the sweet spot with simple implementation,
 reasonably good efficiency for most common operations, and a rich, intuitive
 API.
 
+After discussions with Mario Roy about the potential use of Hash::Ordered
+with L<MCE>, I optimized deletion of larger hashes and provided a tied
+interface for compatibility.  Mario's suggestions and feedback about
+optimizationw were quite valuable.  Thank you, Mario!
+
 =head1 SEE ALSO
 
 This section describes other ordered-hash modules I found on CPAN.  For
