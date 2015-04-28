@@ -88,7 +88,7 @@ in the original will have the value C<undef>.
 =cut
 
 sub clone {
-    my $self = shift;
+    my $self = CORE::shift;
     my @keys = map { "$_" } @_; # stringify keys
     my $clone;
     if (@keys) {
@@ -167,7 +167,7 @@ already exist in the hash, it will be added at the end.
 
 sub set {
     if ( !exists $_[0]->[_DATA]{ $_[1] } ) {
-        push @{ $_[0]->[_KEYS] }, "$_[1]"; # stringify key
+        CORE::push @{ $_[0]->[_KEYS] }, "$_[1]"; # stringify key
         $_[0]->[_INDX]{ $_[1] } = $#{ $_[0]->[_KEYS] } if $_[0]->[_INDX];
     }
     return $_[0]->[_DATA]{ $_[1] } = $_[2];
@@ -284,7 +284,7 @@ sub push {
         my ( $k, $v ) = splice( @pairs, 0, 2 );
         $self->delete($k) if exists $data->{$k};
         $data->{$k} = $v;
-        push @$keys, "$k"; # stringify keys
+        CORE::push @$keys, "$k"; # stringify keys
         $indx->{$k} = $#$keys if $indx;
     }
     return @$keys - $self->[_GCNT];
@@ -305,7 +305,7 @@ sub pop {
         return $key, $self->delete($key);
     }
     else {
-        my $key = pop @{ $self->[_KEYS] };
+        my $key = CORE::pop @{ $self->[_KEYS] };
         return $key, delete $self->[_DATA]{$key};
     }
 }
@@ -329,7 +329,7 @@ sub unshift {
         my ( $k, $v ) = splice( @pairs, -2, 2 );
         $self->delete($k) if exists $data->{$k};
         $data->{$k} = $v;
-        unshift @$keys, "$k"; # stringify keys
+        CORE::unshift @$keys, "$k"; # stringify keys
         $indx->{$k} = -( ++$self->[_OFFS] ) if $indx;
     }
     return @$keys - $self->[_GCNT];
@@ -350,7 +350,7 @@ sub shift {
         return $key, $self->delete($key);
     }
     else {
-        my $key = shift @{ $self->[_KEYS] };
+        my $key = CORE::shift @{ $self->[_KEYS] };
         return $key, delete $self->[_DATA]{$key};
     }
 }
