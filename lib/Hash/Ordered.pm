@@ -108,14 +108,18 @@ sub clone {
 =method keys
 
     @keys = $oh->keys;
+    $size = $oh->keys;
 
-Returns the ordered list of keys.
+In list context, returns the ordered list of keys.  In scalar context, returns
+the number of keys.
 
 =cut
 
 sub keys {
     my ($self) = @_;
-    return grep !ref($_), @{ $self->[_KEYS] };
+    return wantarray
+      ? ( grep !ref($_), @{ $self->[_KEYS] } )
+      : @{ $self->[_KEYS] } - $self->[_GCNT];
 }
 
 =method values
