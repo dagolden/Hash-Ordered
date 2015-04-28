@@ -74,32 +74,40 @@ subtest "overloading" => sub {
 
 subtest "element methods" => sub {
 
-    my $hash = new_ok( HO, [], "new()" );
+    for my $size ( 10, 1000 ) {
 
-    ok( !$hash->exists("a"), "exists is false for non-existing element" );
-    is( $hash->get("a"), undef, "get on non-existing element returns undef" );
-    is( $hash->set( "a", 1 ), 1, "set on non-existing element returns new value" );
-    is( $hash->get("a"), 1, "get on existing element returns value" );
-    ok( $hash->exists("a"), "exists is true for existing element" );
+        my $hash = new_ok( HO, [ 1 .. $size * 2 ] );
+        $hash->delete(3); # trigger tombstone on large hash
 
-    is( $hash->set( "b", 2 ), 2, "set another key" );
-    cmp_deeply( [ $hash->keys ],   [qw/a b/], "keys ordered as expected" );
-    cmp_deeply( [ $hash->values ], [qw/1 2/], "values ordered as expected" );
+        my @keys   = $hash->keys;
+        my @values = $hash->values;
 
-    is( $hash->delete("a"), 1,     "delete existing key returns old value" );
-    is( $hash->delete("z"), undef, "delete non-existing key returns undef" );
+        ok( !$hash->exists("a"), "exists is false for non-existing element" );
+        is( $hash->get("a"), undef, "get on non-existing element returns undef" );
+        is( $hash->set( "a", 1 ), 1, "set on non-existing element returns new value" );
+        is( $hash->get("a"), 1, "get on existing element returns value" );
+        ok( $hash->exists("a"), "exists is true for existing element" );
 
-    is( $hash->set( "c", 3 ), 3, "set another key" );
-    cmp_deeply( [ $hash->keys ],   [qw/b c/], "keys ordered as expected" );
-    cmp_deeply( [ $hash->values ], [qw/2 3/], "values ordered as expected" );
+        is( $hash->set( "b", 2 ), 2, "set another key" );
+        cmp_deeply( [ $hash->keys ],   [ @keys,   qw/a b/ ], "keys ordered as expected" );
+        cmp_deeply( [ $hash->values ], [ @values, qw/1 2/ ], "values ordered as expected" );
 
-    {
-        my @warnings;
-        local $SIG{__WARN__} = sub { push @warnings, @_; return };
-        $hash->set( undef, 42 );
-        is( $hash->get(undef), 42, "undef is an acceptable key" );
-        for (@warnings) {
-            like( $_, qr/uninitialized value/, "undef warning" );
+        is( $hash->delete("a"), 1,     "delete existing key returns old value" );
+        is( $hash->delete("z"), undef, "delete non-existing key returns undef" );
+
+        is( $hash->set( "b", 9 ), 9, "set existing key" );
+        is( $hash->set( "c", 3 ), 3, "set another non-existent key" );
+        cmp_deeply( [ $hash->keys ],   [ @keys,   qw/b c/ ], "keys ordered as expected" );
+        cmp_deeply( [ $hash->values ], [ @values, qw/9 3/ ], "values ordered as expected" );
+
+        {
+            my @warnings;
+            local $SIG{__WARN__} = sub { push @warnings, @_; return };
+            $hash->set( undef, 42 );
+            is( $hash->get(undef), 42, "undef is an acceptable key" );
+            for (@warnings) {
+                like( $_, qr/uninitialized value/, "undef warning" );
+            }
         }
     }
 };
