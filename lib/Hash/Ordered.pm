@@ -3,7 +3,7 @@ use strict;
 use warnings;
 
 package Hash::Ordered;
-# ABSTRACT: A compact, pure-Perl ordered hash class
+# ABSTRACT: A fast, pure-Perl ordered hash class
 
 our $VERSION = '0.005';
 
