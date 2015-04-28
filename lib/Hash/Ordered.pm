@@ -10,17 +10,17 @@ our $VERSION = '0.005';
 use Carp ();
 
 use constant {
-    _DATA => 0,
-    _KEYS => 1,
-    _INDX => 2,
-    _OFFS => 3,
+    _DATA => 0, # unordered data
+    _KEYS => 1, # ordered keys
+    _INDX => 2, # index into _KEYS (on demand)
+    _OFFS => 3, # index offset for optimized shift/unshift
     _GCNT => 4, # garbage count
     _ITER => 5, # for tied hash support
 };
 
 use constant {
-    _INDEX_THRESHOLD => 25,
-    _TOMBSTONE       => \1,
+    _INDEX_THRESHOLD => 25, # max size before indexing/tombstone deletion
+    _TOMBSTONE       => \1, # ref to arbitrary scalar
 };
 
 # 'overloading.pm' not available until 5.10.1 so emulate with Scalar::Util
@@ -31,7 +31,7 @@ BEGIN {
             sub _stringify { no overloading; "$_[0]" }
             sub _numify { no overloading; 0+$_[0] }
         };
-        die $@ if $@; # uncoverable branch true
+        die $@ if $@;       # uncoverable branch true
     }
     else {
         ## no critic
@@ -40,7 +40,7 @@ BEGIN {
             sub _stringify { sprintf("%s=ARRAY(0x%x)",ref($_[0]),Scalar::Util::refaddr($_[0])) }
             sub _numify { Scalar::Util::refaddr($_[0]) }
         };
-        die $@ if $@; # uncoverable branch true
+        die $@ if $@;       # uncoverable branch true
     }
 }
 
