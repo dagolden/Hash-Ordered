@@ -116,6 +116,8 @@ sub clone {
 In list context, returns the ordered list of keys.  In scalar context, returns
 the number of keys.
 
+Current API available since 0.005.
+
 =cut
 
 sub keys {
@@ -189,8 +191,7 @@ sub exists {
 
     $value = $oh->delete("some key");
 
-Removes a key-value pair from the hash and returns the value.  This
-is expensive, as the ordered list of keys has to be updated.
+Removes a key-value pair from the hash and returns the value.
 
 =cut
 
@@ -518,6 +519,8 @@ and false otherwise.
 When used in string context, a Hash::Ordered object stringifies like typical
 Perl objects. E.g. C<Hash::Ordered=ARRAY(0x7f815302cac0)>
 
+Current API available since 0.005.
+
 =head2 Numeric
 
     $count = 0 + $oh;
@@ -527,6 +530,8 @@ representation of its memory address, just like typical Perl objects. E.g.
 C<140268162536552>
 
 For the number of keys, call the L</keys> method in scalar context.
+
+Current API available since 0.005.
 
 =head2 Fallback
 
@@ -543,6 +548,25 @@ you really need it:
 If you want to access the underlying object for method calls, use C<tied>:
 
     tied( %hash )->unshift( @data );
+
+=head1 CAVEATS
+
+=head2 Deletion and order modification with push, pop, etc.
+
+This can be expensive, as the ordered list of keys has to be updated.  For
+small hashes, keys are found and spliced out with linear search.  As an
+optimization for larger hashes, the first change to the ordered list of keys
+will construct an index the list of keys.  Thereafter, removed keys
+will be marked with a "tombstone" record.  Tombstones will be garbage collected
+whenever the number of tombstones exceeds the number of valid keys.
+
+These internal implementation details largely shouldn't concern you.  The
+important things to note are:
+
+=for :list
+* The costs of efficient deletion are deferred until you need it
+* Deleting lots of keys will temporarily appear to leak memory until garbage
+  collection occurs
 
 =head1 MOTIVATION
 
@@ -569,7 +593,7 @@ API.
 After discussions with Mario Roy about the potential use of Hash::Ordered
 with L<MCE>, I optimized deletion of larger hashes and provided a tied
 interface for compatibility.  Mario's suggestions and feedback about
-optimizationw were quite valuable.  Thank you, Mario!
+optimization were quite valuable.  Thank you, Mario!
 
 =head1 SEE ALSO
 

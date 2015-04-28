@@ -7,7 +7,7 @@ use 5.008;
 use ExtUtils::MakeMaker 6.17;
 
 my %WriteMakefileArgs = (
-  "ABSTRACT" => "A compact, pure-Perl ordered hash class",
+  "ABSTRACT" => "A fast, pure-Perl ordered hash class",
   "AUTHOR" => "David Golden <dagolden\@cpan.org>",
   "CONFIGURE_REQUIRES" => {
     "ExtUtils::MakeMaker" => "6.17"
