@@ -288,8 +288,14 @@ Removes and returns the last key-value pair in the ordered hash.
 
 sub pop {
     my ($self) = @_;
-    my $key = $self->[_KEYS][-1];
-    return $key, $self->delete($key);
+    if ( $self->[_INDX] ) {
+        my $key = $self->[_KEYS][-1];
+        return $key, $self->delete($key);
+    }
+    else {
+        my $key = pop @{ $self->[_KEYS] };
+        return $key, delete $self->[_DATA]{$key};
+    }
 }
 
 =method unshift
@@ -330,8 +336,14 @@ Removes and returns the first key-value pair in the ordered hash.
 
 sub shift {
     my ($self) = @_;
-    my $key = $self->[_KEYS][0];
-    return $key, $self->delete($key);
+    if ( $self->[_INDX] ) {
+        my $key = $self->[_KEYS][0];
+        return $key, $self->delete($key);
+    }
+    else {
+        my $key = shift @{ $self->[_KEYS] };
+        return $key, delete $self->[_DATA]{$key};
+    }
 }
 
 =method merge
