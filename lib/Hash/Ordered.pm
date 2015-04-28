@@ -26,6 +26,7 @@ use constant {
 # 'overloading.pm' not available until 5.10.1 so emulate with Scalar::Util
 BEGIN {
     if ( $] gt '5.010000' ) {
+        ## no critic
         eval q{
             sub _stringify { no overloading; "$_[0]" }
             sub _numify { no overloading; 0+$_[0] }
@@ -33,6 +34,7 @@ BEGIN {
         die $@ if $@; # uncoverable branch true
     }
     else {
+        ## no critic
         eval q{
             require Scalar::Util;
             sub _stringify { sprintf("%s=ARRAY(0x%x)",ref($_[0]),Scalar::Util::refaddr($_[0])) }
