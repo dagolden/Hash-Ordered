@@ -24,7 +24,7 @@ use constant {
 
 # 'overloading.pm' not available until 5.10.1 so emulate with Scalar::Util
 BEGIN {
-    if ( 0 && $] gt '5.010000' ) {
+    if ( $] gt '5.010000' ) {
         eval q/sub _stringify { no overloading; "$_[0]" }/;
         die $@ if $@;
     }
