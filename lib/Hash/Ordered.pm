@@ -15,6 +15,7 @@ use constant {
     _INDX => 2,
     _OFFS => 3,
     _GCNT => 4, # garbage count
+    _ITER => 5, # for tied hash support
 };
 
 use constant {
@@ -421,6 +422,41 @@ sub iterator {
         my $key = CORE::shift(@keys);
         return ( $key => $data->{$key} );
     };
+}
+
+#--------------------------------------------------------------------------#
+# tied hash support -- slower, but I maybe some thing are more succinct
+#--------------------------------------------------------------------------#
+
+{
+    no strict 'refs';
+
+    *{ __PACKAGE__ . '::TIEHASH' } = \&new;
+    *{ __PACKAGE__ . '::STORE' }   = \&set;
+    *{ __PACKAGE__ . '::FETCH' }   = \&get;
+    *{ __PACKAGE__ . '::EXISTS' }  = \&exists;
+    *{ __PACKAGE__ . '::DELETE' }  = \&delete;
+    *{ __PACKAGE__ . '::CLEAR' }   = \&clear;
+}
+
+sub FIRSTKEY {
+    my ($self) = @_;
+    my @keys = grep !ref($_), @{ $self->[_KEYS] };
+    $self->[_ITER] = sub {
+        return unless @keys;
+        return CORE::shift(@keys);
+    };
+    return $self->[_ITER]->();
+}
+
+sub NEXTKEY {
+    my ($self) = @_;
+    return $self->[_ITER]->();
+}
+
+sub SCALAR {
+    my ($self) = @_;
+    return scalar %{ $self->[_DATA] };
 }
 
 1;
