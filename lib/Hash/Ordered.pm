@@ -45,7 +45,7 @@ BEGIN {
 use overload
   q{""}    => \&_stringify,
   q{0+}    => \&_numify,
-  q{bool}  => sub { @{ $_[0]->[_KEYS] } - $_[0]->[_GCNT] > 0 },
+  q{bool}  => sub { !!scalar %{ $_[0]->[_DATA] } },
   fallback => 1;
 
 =method new
