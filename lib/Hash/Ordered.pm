@@ -29,7 +29,7 @@ BEGIN {
             sub _stringify { no overloading; "$_[0]" }
             sub _numify { no overloading; 0+$_[0] }
         };
-        die $@ if $@;
+        die $@ if $@; # uncoverable branch true
     }
     else {
         eval q{
@@ -37,7 +37,7 @@ BEGIN {
             sub _stringify { sprintf("%s=ARRAY(0x%x)",ref($_[0]),Scalar::Util::refaddr($_[0])) }
             sub _numify { Scalar::Util::refaddr($_[0]) }
         };
-        die $@ if $@;
+        die $@ if $@; # uncoverable branch true
     }
 }
 
