@@ -25,19 +25,26 @@ use constant {
 # 'overloading.pm' not available until 5.10.1 so emulate with Scalar::Util
 BEGIN {
     if ( $] gt '5.010000' ) {
-        eval q/sub _stringify { no overloading; "$_[0]" }/;
+        eval q{
+            sub _stringify { no overloading; "$_[0]" }
+            sub _numify { no overloading; 0+$_[0] }
+        };
         die $@ if $@;
     }
     else {
-        eval
-          q/require Scalar::Util; sub _stringify { sprintf("%s=ARRAY(0x%x)",ref($_[0]),Scalar::Util::refaddr($_[0])) }/;
+        eval q{
+            require Scalar::Util;
+            sub _stringify { sprintf("%s=ARRAY(0x%x)",ref($_[0]),Scalar::Util::refaddr($_[0])) }
+            sub _numify { Scalar::Util::refaddr($_[0]) }
+        };
         die $@ if $@;
     }
 }
 
 use overload
   q{""}    => \&_stringify,
-  'bool'   => sub { @{ $_[0]->[_KEYS] } - $_[0]->[_GCNT] },
+  q{0+}    => \&_numify,
+  q{bool}  => sub { @{ $_[0]->[_KEYS] } - $_[0]->[_GCNT] > 0 },
   fallback => 1;
 
 =method new
@@ -461,6 +468,27 @@ slower than a Perl hash.  This is the cost of keeping order.
 
 When used in boolean context, a Hash::Ordered object is true if it has any entries
 and false otherwise.
+
+=head2 String
+
+    say "$oh";
+
+When used in string context, a Hash::Ordered object stringifies like typical
+Perl objects. E.g. C<Hash::Ordered=ARRAY(0x7f815302cac0)>
+
+=head2 Numeric
+
+    $count = 0 + $oh;
+
+When used in numeric context, a Hash::Ordered object numifies as the decimal
+representation of its memory address, just like typical Perl objects. E.g.
+C<140268162536552>
+
+For the number of keys, call the L</keys> method in scalar context.
+
+=head2 Fallback
+
+Other L<overload> methods are derived from these three, if possible.
 
 =head1 MOTIVATION
 

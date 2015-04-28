@@ -53,12 +53,22 @@ subtest "constructors" => sub {
 
 };
 
-subtest "boolean" => sub {
+subtest "overloading" => sub {
 
     my $hash = new_ok( HO, [], "new()" );
-    ok( !$hash, "empty hash is false" );
+    ok( !$hash, "empty hash is boolean false" );
     $hash->set( a => 1 );
-    ok( $hash, "non-empty hash is true" );
+    ok( !!$hash, "non-empty hash is boolean true" );
+
+    $hash = new_ok( HO, [], "new()" );
+
+    like(
+        "$hash",
+        qr/\AHash::Ordered=ARRAY\(0x[0-9a-f]+\)\z/,
+        "stringified gives typical Perl object string form"
+    );
+
+    like( 0+ $hash, qr/\A\d+\z/, "numified gives typical Perl object decimal address" );
 
 };
 
