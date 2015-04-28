@@ -211,7 +211,7 @@ sub delete {
             # or maybe garbage collect start of list
             elsif ( ref( $keys->[0] ) ) {
                 my $i = 0;
-                $i++ while ( $i <= $#{$keys} && ref( $keys->[$i] ) );
+                $i++ while ref( $keys->[$i] );
                 splice @$keys, 0, $i;
                 $self->[_GCNT] -= $i;
                 $self->[_OFFS] -= $i;
@@ -219,7 +219,7 @@ sub delete {
             # or maybe garbage collect end of list
             elsif ( ref( $keys->[-1] ) ) {
                 my $i = $#{$keys};
-                $i-- while ( $i >= 0 && ref( $keys->[$i] ) );
+                $i-- while ref( $keys->[$i] );
                 $self->[_GCNT] -= $#{$keys} - $i;
                 splice @$keys, $i + 1;
             }
