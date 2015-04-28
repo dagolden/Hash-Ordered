@@ -530,6 +530,18 @@ For the number of keys, call the L</keys> method in scalar context.
 
 Other L<overload> methods are derived from these three, if possible.
 
+=head1 TIED INTERFACE
+
+Using C<tie> is slower than using method calls directly.  But for
+compatibility with libraries that can only take hashes, it's available if
+you really need it:
+
+    tie my %hash, "Hash::Ordered", @pairs;
+
+If you want to access the underlying object for method calls, use C<tied>:
+
+    tied( %hash )->unshift( @data );
+
 =head1 MOTIVATION
 
 For a long time, I used L<Tie::IxHash> for ordered hashes, but I grew
