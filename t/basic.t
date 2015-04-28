@@ -152,58 +152,72 @@ subtest "clear" => sub {
 
 subtest "list methods" => sub {
 
-    my $hash = new_ok( HO, [ a => 1 ], "new( a => 1 )" );
+    for my $size ( 10, 1000 ) {
 
-    is( $hash->push( b => 2, c => 3 ), 3, "pushing 2 new pairs" );
+        my @pairs = ( 1 .. $size * 2 );
 
-    cmp_deeply(
-        [ $hash->as_list ],
-        [ a => 1, b => 2, c => 3 ],
-        "hash keys/values correct after pushing new pairs"
-    );
+        my $hash = new_ok( HO, \@pairs );
+        $hash->delete(3); # trigger tombstone on large hash
+        splice @pairs, 2, 2; # delete '3' and '4'
+        my $hsize = $hash->keys;
 
-    cmp_deeply( [ $hash->pop ], [ c => 3 ], "pop returns last pair" );
+        is( $hash->push( b => 2, c => 3 ), $hsize + 2, "pushing 2 new pairs" );
 
-    cmp_deeply(
-        [ $hash->as_list ],
-        [ a => 1, b => 2 ],
-        "hash keys/values correct after pop"
-    );
+        cmp_deeply(
+            [ $hash->as_list ],
+            [ @pairs, b => 2, c => 3 ],
+            "hash keys/values correct after pushing new pairs"
+        );
 
-    is( $hash->unshift( y => 25, z => 26 ), 4, "unshifting 2 pairs" );
+        cmp_deeply( [ $hash->pop ], [ c => 3 ], "pop returns last pair" );
 
-    cmp_deeply(
-        [ $hash->as_list ],
-        [ y => 25, z => 26, a => 1, b => 2 ],
-        "hash keys/values correct after unshifting new pairs"
-    );
+        cmp_deeply(
+            [ $hash->as_list ],
+            [ @pairs, b => 2 ],
+            "hash keys/values correct after pop"
+        );
 
-    cmp_deeply( [ $hash->shift ], [ y => 25 ], "shift returns first pair" );
+        is( $hash->unshift( y => 25, z => 26 ), $hsize + 3, "unshifting 2 pairs" );
 
-    ok( $hash->push( z => 42 ), "pushing existing key with new value" );
+        cmp_deeply(
+            [ $hash->as_list ],
+            [ y => 25, z => 26, @pairs, b => 2 ],
+            "hash keys/values correct after unshifting new pairs"
+        );
 
-    cmp_deeply(
-        [ $hash->as_list ],
-        [ a => 1, b => 2, z => 42 ],
-        "hash keys/values correct after pushing existing key"
-    );
+        cmp_deeply( [ $hash->shift ], [ y => 25 ], "shift returns first pair" );
 
-    ok( $hash->unshift( z => 26 ), "unshifting existing key with new value" );
+        cmp_deeply(
+            [ $hash->as_list ],
+            [ z => 26, @pairs, b => 2 ],
+            "hash keys/values correct after shifting"
+        );
 
-    cmp_deeply(
-        [ $hash->as_list ],
-        [ z => 26, a => 1, b => 2 ],
-        "hash keys/values correct after unshifting existing key"
-    );
+        ok( $hash->push( z => 42 ), "pushing existing key with new value" );
 
-    ok( $hash->merge( a => 2, c => 3 ), "merging key-value pairs" );
+        cmp_deeply(
+            [ $hash->as_list ],
+            [ @pairs, b => 2, z => 42 ],
+            "hash keys/values correct after pushing existing key"
+        );
 
-    cmp_deeply(
-        [ $hash->as_list ],
-        [ z => 26, a => 2, b => 2, c => 3 ],
-        "hash keys/values correct after merging pairs"
-    );
+        ok( $hash->unshift( z => 26 ), "unshifting existing key with new value" );
 
+        cmp_deeply(
+            [ $hash->as_list ],
+            [ z => 26, @pairs, b => 2 ],
+            "hash keys/values correct after unshifting existing key"
+        );
+
+        ok( $hash->merge( z => 2, c => 3 ), "merging key-value pairs" );
+
+        cmp_deeply(
+            [ $hash->as_list ],
+            [ z => 2, @pairs, b => 2, c => 3 ],
+            "hash keys/values correct after merging pairs"
+        );
+
+    }
 };
 
 done_testing;
