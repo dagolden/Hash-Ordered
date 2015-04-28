@@ -139,8 +139,7 @@ the hash.
 =cut
 
 sub get {
-    my ( $self, $key ) = @_;
-    return $self->[_DATA]{$key};
+    return $_[0]->[_DATA]{ $_[1] };
 }
 
 =method set
@@ -153,12 +152,11 @@ already exist in the hash, it will be added at the end.
 =cut
 
 sub set {
-    my ( $self, $key, $value ) = @_;
-    if ( !exists $self->[_DATA]{$key} ) {
-        my $size = push @{ $self->[_KEYS] }, "$key"; # stringify key
-        $self->[_INDX]{$key} = $size - 1 if $self->[_INDX];
+    if ( !exists $_[0]->[_DATA]{ $_[1] } ) {
+        push @{ $_[0]->[_KEYS] }, "$_[1]"; # stringify key
+        $_[0]->[_INDX]{ $_[1] } = $#{ $_[0]->[_KEYS] } if $_[0]->[_INDX];
     }
-    return $self->[_DATA]{$key} = $value;
+    return $_[0]->[_DATA]{ $_[1] } = $_[2];
 }
 
 =method exists
@@ -170,8 +168,7 @@ Test if some key exists in the hash (without creating it).
 =cut
 
 sub exists {
-    my ( $self, $key ) = @_;
-    return exists $self->[_DATA]{$key};
+    return exists $_[0]->[_DATA]{ $_[1] };
 }
 
 =method delete
@@ -268,14 +265,15 @@ Returns the number of keys after the push is complete.
 
 sub push {
     my ( $self, @pairs ) = @_;
+    my ( $data, $keys, $indx ) = @$self;
     while (@pairs) {
         my ( $k, $v ) = splice( @pairs, 0, 2 );
-        $self->delete($k) if exists $self->[_DATA]{$k};
-        $self->[_DATA]{$k} = $v;
-        my $size = push @{ $self->[_KEYS] }, "$k"; # stringify keys
-        $self->[_INDX]{$k} = $size - 1 if $self->[_INDX];
+        $self->delete($k) if exists $data->{$k};
+        $data->{$k} = $v;
+        push @$keys, "$k"; # stringify keys
+        $indx->{$k} = $#$keys if $indx;
     }
-    return @{ $self->[_KEYS] } - $self->[_GCNT];
+    return @$keys - $self->[_GCNT];
 }
 
 =method pop
@@ -312,18 +310,15 @@ Returns the number of keys after the unshift is complete.
 
 sub unshift {
     my ( $self, @pairs ) = @_;
+    my ( $data, $keys, $indx ) = @$self;
     while (@pairs) {
         my ( $k, $v ) = splice( @pairs, -2, 2 );
-        if ( exists $self->[_DATA]{$k} ) {
-            $self->delete($k);
-        }
-        unshift @{ $self->[_KEYS] }, "$k"; # stringify keys
-        $self->[_DATA]{$k} = $v;
-        if ( $self->[_INDX] ) {
-            $self->[_INDX]{$k} = -( ++$self->[_OFFS] );
-        }
+        $self->delete($k) if exists $data->{$k};
+        $data->{$k} = $v;
+        unshift @$keys, "$k"; # stringify keys
+        $indx->{$k} = -( ++$self->[_OFFS] ) if $indx;
     }
-    return @{ $self->[_KEYS] } - $self->[_GCNT];
+    return @$keys - $self->[_GCNT];
 }
 
 =method shift
