@@ -237,6 +237,14 @@ subtest "modifiers" => sub {
     is( $hash->inc( 'a', 2 ),  3, "inc +2" );
     is( $hash->inc( 'a', -1 ), 2, "inc -1" );
 
+    # postinc
+
+    is( $hash->postinc('a'), '2', "postinc return" );
+    is( $hash->get('a'),     3,   "value was incremented" );
+
+    is( $hash->postinc( 'a', 2 ), '3', "postinc return" );
+    is( $hash->get('a'), 5, "value was incremented" );
+
     # dec
     # concat
     # or_equals

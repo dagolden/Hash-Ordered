@@ -432,8 +432,9 @@ sub iterator {
     $oh->inc($key);      # like ++$hash{$key}
     $oh->inc($key, $n);  # like $hash{$key} += $n
 
-This method is sugar for incrementing a key without having to call C<set>
-and C<get> explicitly.  It returns the new value.
+This method is sugar for incrementing a key without having to call C<set> and
+C<get> explicitly.  With no increment value, it increments by one. It returns
+the new value.
 
 =cut
 
@@ -444,6 +445,29 @@ sub inc {
     }
     else {
         return ++$self->[_DATA]{$key};
+    }
+}
+
+=method postinc
+
+    $oh->postinc($key);      # like $hash{$key}++
+    $oh->postinc($key, $n);
+
+This method is sugar for incrementing a key without having to call C<set> and
+C<get> explicitly.  With no increment value, it increments by one. It returns
+the old value.
+
+=cut
+
+sub postinc {
+    my ( $self, $key, $value ) = @_;
+    if ($value) {
+        my $old = $self->[_DATA]{$key};
+        $self->[_DATA]{$key} += $value;
+        return $old;
+    }
+    else {
+        return $self->[_DATA]{$key}++;
     }
 }
 
