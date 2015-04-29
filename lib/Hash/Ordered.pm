@@ -427,6 +427,26 @@ sub iterator {
     };
 }
 
+=method inc
+
+    $oh->inc($key);      # like ++$hash{$key}
+    $oh->inc($key, $n);  # like $hash{$key} += $n
+
+This method is sugar for incrementing a key without having to call C<set>
+and C<get> explicitly.  It returns the new value.
+
+=cut
+
+sub inc {
+    my ( $self, $key, $value ) = @_;
+    if ($value) {
+        return $self->[_DATA]{$key} += $value;
+    }
+    else {
+        return ++$self->[_DATA]{$key};
+    }
+}
+
 #--------------------------------------------------------------------------#
 # tied hash support -- slower, but I maybe some thing are more succinct
 #--------------------------------------------------------------------------#

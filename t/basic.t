@@ -228,6 +228,22 @@ subtest "list methods" => sub {
     }
 };
 
+subtest "modifiers" => sub {
+
+    my $hash = new_ok( HO, [ 'a' => 0 ] );
+
+    # inc
+    is( $hash->inc('a'), 1, "inc" );
+    is( $hash->inc( 'a', 2 ),  3, "inc +2" );
+    is( $hash->inc( 'a', -1 ), 2, "inc -1" );
+
+    # dec
+    # concat
+    # or_equals
+    # dor_equals
+
+};
+
 done_testing;
 
 # vim: ts=4 sts=4 sw=4 et:
