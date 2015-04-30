@@ -168,11 +168,12 @@ already exist in the hash, it will be added at the end.
 =cut
 
 sub set {
-    if ( !exists $_[0]->[_DATA]{ $_[1] } ) {
-        CORE::push @{ $_[0]->[_KEYS] }, "$_[1]"; # stringify key
-        $_[0]->[_INDX]{ $_[1] } = $#{ $_[0]->[_KEYS] } if $_[0]->[_INDX];
+    my ( $self, $key ) = @_; # don't copy $_[2] in case it's large
+    if ( !exists $self->[_DATA]{$key} ) {
+        CORE::push @{ $self->[_KEYS] }, "$key"; # stringify key
+        $self->[_INDX]{$key} = $#{ $self->[_KEYS] } if $self->[_INDX];
     }
-    return $_[0]->[_DATA]{ $_[1] } = $_[2];
+    return $self->[_DATA]{$key} = $_[2];
 }
 
 =method exists
