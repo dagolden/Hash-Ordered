@@ -471,6 +471,82 @@ sub postinc {
     }
 }
 
+=method dec
+
+    $oh->dec($key);      # like --$hash{$key}
+    $oh->dec($key, $n);  # like $hash{$key} -= $n
+
+This method is sugar for decrementing a key without having to call C<set> and
+C<get> explicitly.  With no decrement value, it decrements by one. It returns
+the new value.
+
+=cut
+
+sub dec {
+    my ( $self, $key, $value ) = @_;
+    if ($value) {
+        return $self->[_DATA]{$key} -= $value;
+    }
+    else {
+        return --$self->[_DATA]{$key};
+    }
+}
+
+=method concat
+
+    $oh->concat($key, $str); # like $hash{$key} .= $str
+
+This method is sugar for concatenating a string onto the value of a key without
+having to call C<set> and C<get> explicitly. It returns the new value.  If the
+value to append is not defined, no concatenation is done and no warning is
+given.
+
+=cut
+
+sub concat {
+    my ( $self, $key ) = @_; # don't copy $_[2] in case it's large
+    if ( defined $_[2] ) {
+        return $self->[_DATA]{$key} .= $_[2];
+    }
+    else {
+        return $self->[_DATA]{$key};
+    }
+}
+
+=method or_equals
+
+    $oh->or_equals($key, $str); # like $hash{$key} ||= $str
+
+This method is sugar for assigning to a key if the existing value is false
+without having to call C<set> and C<get> explicitly. It returns the new value.
+
+=cut
+
+sub or_equals {
+    my ( $self, $key ) = @_; # don't copy $_[2] in case it's large
+    return $self->[_DATA]{$key} ||= $_[2];
+}
+
+=method dor_equals
+
+    $oh->dor_equals($key, $str); # like $hash{$key} //= $str
+
+This method is sugar for assigning to a key if the existing value is not
+defined without having to call C<set> and C<get> explicitly. It returns the new
+value.
+
+=cut
+
+sub dor_equals {
+    my ( $self, $key ) = @_; # don't copy $_[2] in case it's large
+    if ( defined $self->[_DATA]{$key} ) {
+        return $self->[_DATA]{$key};
+    }
+    else {
+        return $self->[_DATA]{$key} = $_[2];
+    }
+}
+
 #--------------------------------------------------------------------------#
 # tied hash support -- slower, but I maybe some thing are more succinct
 #--------------------------------------------------------------------------#

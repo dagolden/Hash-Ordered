@@ -233,9 +233,9 @@ subtest "modifiers" => sub {
     my $hash = new_ok( HO, [ 'a' => 0 ] );
 
     # inc
-    is( $hash->inc('a'), 1, "inc" );
-    is( $hash->inc( 'a', 2 ),  3, "inc +2" );
-    is( $hash->inc( 'a', -1 ), 2, "inc -1" );
+    is( $hash->inc('a'), 1, "inc return" );
+    is( $hash->inc( 'a', 2 ),  3, "inc +2 return" );
+    is( $hash->inc( 'a', -1 ), 2, "inc -1 return" );
 
     # postinc
 
@@ -246,9 +246,24 @@ subtest "modifiers" => sub {
     is( $hash->get('a'), 5, "value was incremented" );
 
     # dec
+
+    is( $hash->dec('a'), '4', "dec return" );
+    is( $hash->dec( 'a', 2 ), '2', "dec 2 return" );
+
     # concat
+
+    is( $hash->concat('a'), '2', "concat undef return" );
+    is( $hash->concat( 'a', 'a' ), '2a', "concat 'a' return" );
+
     # or_equals
+    is( $hash->or_equals( 'a', 42 ), '2a', "or_equals on existing key" );
+    is( $hash->or_equals( 'b', 0 ),  '0',  "or_equals on new key" );
+    is( $hash->or_equals( 'b', 42 ), '42', "or_equals on existing, false key" );
+
     # dor_equals
+    is( $hash->dor_equals( 'a', 23 ), '2a', "dor_equals on existing key" );
+    is( $hash->dor_equals( 'c', 0 ),  '0',  "dor_equals on new key" );
+    is( $hash->dor_equals( 'c', 42 ), '0',  "dor_equals on existing, false key" );
 
 };
 
