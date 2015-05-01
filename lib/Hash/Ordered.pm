@@ -466,7 +466,7 @@ sub postinc {
 This method is sugar for decrementing a key without having to call C<set> and
 C<get> explicitly. It returns the new value.
 
-Current API available sdece 0.005.
+Current API available since 0.005.
 
 =cut
 
@@ -481,7 +481,7 @@ sub predec {
 This method is sugar for decrementing a key without having to call C<set> and
 C<get> explicitly.  It returns the old value.
 
-Current API available sdece 0.005.
+Current API available since 0.005.
 
 =cut
 
@@ -572,6 +572,7 @@ Current API available since 0.005.
 
 BEGIN {
     if ( $] ge '5.010' ) {
+        ## no critic
         eval q{
                 sub dor_equals {
                     return $_[0]->[_DATA]{$_[1]} //= $_[2];
@@ -580,6 +581,7 @@ BEGIN {
         die $@ if $@; # uncoverable branch true
     }
     else {
+        ## no critic
         eval q{
                 sub dor_equals {
                     if ( defined $_[0]->[_DATA]{$_[1]} ) {
