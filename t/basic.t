@@ -232,36 +232,40 @@ subtest "modifiers" => sub {
 
     my $hash = new_ok( HO, [ 'a' => 0 ] );
 
-    # inc
-    is( $hash->inc('a'), 1, "inc return" );
-    is( $hash->inc( 'a', 2 ),  3, "inc +2 return" );
-    is( $hash->inc( 'a', -1 ), 2, "inc -1 return" );
+    # preinc
+    is( $hash->preinc('a'), 1, "preinc return" );
+
+    # add
+
+    is( $hash->add( 'a', 2 ),  3, "add +2 return" );
+    is( $hash->add( 'a', -1 ), 2, "add -1 return" );
 
     # postinc
 
     is( $hash->postinc('a'), '2', "postinc return" );
     is( $hash->get('a'),     3,   "value was incremented" );
 
-    is( $hash->postinc( 'a', 2 ), '3', "postinc return" );
-    is( $hash->get('a'), 5, "value was incremented" );
+    # predec
 
-    # dec
+    is( $hash->predec('a'), '2', "predec return" );
 
-    is( $hash->dec('a'), '4', "dec return" );
-    is( $hash->dec( 'a', 2 ), '2', "dec 2 return" );
+    # postdec
+
+    is( $hash->postdec('a'), '2', "postdec return" );
+    is( $hash->get('a'),     1,   "value was decremented" );
 
     # concat
 
-    is( $hash->concat('a'), '2', "concat undef return" );
-    is( $hash->concat( 'a', 'a' ), '2a', "concat 'a' return" );
+    is( $hash->concat('a'), '1', "concat undef return" );
+    is( $hash->concat( 'a', 'a' ), '1a', "concat 'a' return" );
 
     # or_equals
-    is( $hash->or_equals( 'a', 42 ), '2a', "or_equals on existing key" );
+    is( $hash->or_equals( 'a', 42 ), '1a', "or_equals on existing key" );
     is( $hash->or_equals( 'b', 0 ),  '0',  "or_equals on new key" );
     is( $hash->or_equals( 'b', 42 ), '42', "or_equals on existing, false key" );
 
     # dor_equals
-    is( $hash->dor_equals( 'a', 23 ), '2a', "dor_equals on existing key" );
+    is( $hash->dor_equals( 'a', 23 ), '1a', "dor_equals on existing key" );
     is( $hash->dor_equals( 'c', 0 ),  '0',  "dor_equals on new key" );
     is( $hash->dor_equals( 'c', 42 ), '0',  "dor_equals on existing, false key" );
 

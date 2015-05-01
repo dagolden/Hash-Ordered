@@ -428,75 +428,96 @@ sub iterator {
     };
 }
 
-=method inc
+=method preinc
 
     $oh->inc($key);      # like ++$hash{$key}
-    $oh->inc($key, $n);  # like $hash{$key} += $n
 
 This method is sugar for incrementing a key without having to call C<set> and
-C<get> explicitly.  With no increment value, it increments by one. It returns
-the new value.
+C<get> explicitly. It returns the new value.
 
 Current API available since 0.005.
 
 =cut
 
-sub inc {
-    my ( $self, $key, $value ) = @_;
-    if ($value) {
-        return $self->[_DATA]{$key} += $value;
-    }
-    else {
-        return ++$self->[_DATA]{$key};
-    }
+sub preinc {
+    return ++$_[0]->[_DATA]{ $_[1] };
 }
 
 =method postinc
 
     $oh->postinc($key);      # like $hash{$key}++
-    $oh->postinc($key, $n);
 
 This method is sugar for incrementing a key without having to call C<set> and
-C<get> explicitly.  With no increment value, it increments by one. It returns
-the old value.
+C<get> explicitly.  It returns the old value.
 
 Current API available since 0.005.
 
 =cut
 
 sub postinc {
-    my ( $self, $key, $value ) = @_;
-    if ($value) {
-        my $old = $self->[_DATA]{$key};
-        $self->[_DATA]{$key} += $value;
-        return $old;
-    }
-    else {
-        return $self->[_DATA]{$key}++;
-    }
+    return $_[0]->[_DATA]{ $_[1] }++;
 }
 
-=method dec
+=method predec
 
-    $oh->dec($key);      # like --$hash{$key}
-    $oh->dec($key, $n);  # like $hash{$key} -= $n
+    $oh->predec($key);      # like --$hash{$key}
 
 This method is sugar for decrementing a key without having to call C<set> and
-C<get> explicitly.  With no decrement value, it decrements by one. It returns
-the new value.
+C<get> explicitly. It returns the new value.
+
+Current API available sdece 0.005.
+
+=cut
+
+sub predec {
+    return --$_[0]->[_DATA]{ $_[1] };
+}
+
+=method postdec
+
+    $oh->postdec($key);      # like $hash{$key}--
+
+This method is sugar for decrementing a key without having to call C<set> and
+C<get> explicitly.  It returns the old value.
+
+Current API available sdece 0.005.
+
+=cut
+
+sub postdec {
+    return $_[0]->[_DATA]{ $_[1] }--;
+}
+
+=method add
+
+    $oh->add($key, $n);  # like $hash{$key} += $n
+
+This method is sugar for adding a value to a key without having to call
+C<set> and C<get> explicitly. With no value to add, it is treated as "0".
+It returns the new value.
 
 Current API available since 0.005.
 
 =cut
 
-sub dec {
-    my ( $self, $key, $value ) = @_;
-    if ($value) {
-        return $self->[_DATA]{$key} -= $value;
-    }
-    else {
-        return --$self->[_DATA]{$key};
-    }
+sub add {
+    return $_[0]->[_DATA]{ $_[1] } += $_[2] || 0;
+}
+
+=method subtract
+
+    $oh->subtract($key, $n);  # like $hash{$key} -= $n
+
+This method is sugar for subtracting a value from a key without having to call
+C<set> and C<get> explicitly. With no value to subtract, it is treated as "0".
+It returns the new value.
+
+Current API available since 0.005.
+
+=cut
+
+sub subtract {
+    return $_[0]->[_DATA]{ $_[1] } -= $_[2] || 0;
 }
 
 =method concat
