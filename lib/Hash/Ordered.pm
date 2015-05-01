@@ -437,6 +437,8 @@ This method is sugar for incrementing a key without having to call C<set> and
 C<get> explicitly.  With no increment value, it increments by one. It returns
 the new value.
 
+Current API available since 0.005.
+
 =cut
 
 sub inc {
@@ -457,6 +459,8 @@ sub inc {
 This method is sugar for incrementing a key without having to call C<set> and
 C<get> explicitly.  With no increment value, it increments by one. It returns
 the old value.
+
+Current API available since 0.005.
 
 =cut
 
@@ -481,6 +485,8 @@ This method is sugar for decrementing a key without having to call C<set> and
 C<get> explicitly.  With no decrement value, it decrements by one. It returns
 the new value.
 
+Current API available since 0.005.
+
 =cut
 
 sub dec {
@@ -502,6 +508,8 @@ having to call C<set> and C<get> explicitly. It returns the new value.  If the
 value to append is not defined, no concatenation is done and no warning is
 given.
 
+Current API available since 0.005.
+
 =cut
 
 sub concat {
@@ -521,6 +529,8 @@ sub concat {
 This method is sugar for assigning to a key if the existing value is false
 without having to call C<set> and C<get> explicitly. It returns the new value.
 
+Current API available since 0.005.
+
 =cut
 
 sub or_equals {
@@ -535,6 +545,8 @@ sub or_equals {
 This method is sugar for assigning to a key if the existing value is not
 defined without having to call C<set> and C<get> explicitly. It returns the new
 value.
+
+Current API available since 0.005.
 
 =cut
 
@@ -623,6 +635,11 @@ This module implements an ordered hash, meaning that it associates keys with
 values like a Perl hash, but keeps the keys in a consistent order.  Because it
 is implemented as an object and manipulated with method calls, it is much
 slower than a Perl hash.  This is the cost of keeping order.
+
+However, compared to other B<ordered> hash implementations, Hash::Ordered is
+optimized for getting and setting individual elements and is generally faster
+at most other tasks as well.  For specific details, see
+L<Hash::Ordered::Benchmarks>.
 
 =head1 OVERLOADING
 
