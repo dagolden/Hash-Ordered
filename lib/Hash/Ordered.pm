@@ -534,12 +534,11 @@ Current API available since 0.005.
 =cut
 
 sub concat {
-    my ( $self, $key ) = @_; # don't copy $_[2] in case it's large
     if ( defined $_[2] ) {
-        return $self->[_DATA]{$key} .= $_[2];
+        return $_[0]->[_DATA]{ $_[1] } .= $_[2];
     }
     else {
-        return $self->[_DATA]{$key};
+        return $_[0]->[_DATA]{ $_[1] };
     }
 }
 
@@ -555,8 +554,7 @@ Current API available since 0.005.
 =cut
 
 sub or_equals {
-    my ( $self, $key ) = @_; # don't copy $_[2] in case it's large
-    return $self->[_DATA]{$key} ||= $_[2];
+    return $_[0]->[_DATA]{ $_[1] } ||= $_[2];
 }
 
 =method dor_equals
@@ -571,13 +569,27 @@ Current API available since 0.005.
 
 =cut
 
-sub dor_equals {
-    my ( $self, $key ) = @_; # don't copy $_[2] in case it's large
-    if ( defined $self->[_DATA]{$key} ) {
-        return $self->[_DATA]{$key};
+BEGIN {
+    if ( $] ge '5.010' ) {
+        eval q{
+                sub dor_equals {
+                    return $_[0]->[_DATA]{$_[1]} //= $_[2];
+                }
+            };
+        die $@ if $@; # uncoverable branch true
     }
     else {
-        return $self->[_DATA]{$key} = $_[2];
+        eval q{
+                sub dor_equals {
+                    if ( defined $_[0]->[_DATA]{$_[1]} ) {
+                        return $_[0]->[_DATA]{$_[1]};
+                    }
+                    else {
+                        return $_[0]->[_DATA]{$_[1]} = $_[2];
+                    }
+                }
+            };
+        die $@ if $@; # uncoverable branch true
     }
 }
 
@@ -607,13 +619,11 @@ sub FIRSTKEY {
 }
 
 sub NEXTKEY {
-    my ($self) = @_;
-    return $self->[_ITER]->();
+    return $_[0]->[_ITER]->();
 }
 
 sub SCALAR {
-    my ($self) = @_;
-    return scalar %{ $self->[_DATA] };
+    return scalar %{ $_[0]->[_DATA] };
 }
 
 1;
