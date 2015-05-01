@@ -8,6 +8,13 @@ ordered keys.  I thought this would perform well for common tasks and
 likely outperform more complicated ordered hash implementations, so I
 decided to do some benchmarking to test it.
 
+B<Note>: since the initial benchmarking, C<Hash::Ordered> gained just-in-time
+indexing of the keys array to support faster tombstone deletion.  It also
+now support C<tie>.  The revised benchmarks include the C<tie> mode
+for consistency with other tied hash implementations.
+
+=head1 MODULES TESTED
+
 In my review of alternatives to C<Hash::Ordered>, six seemed sufficiently
 general-purpose to be worth benchmarking.  The modules tested are listed in
 the benchmark output in shorthand:
@@ -16,7 +23,7 @@ the benchmark output in shorthand:
 * L<Array::AsHash> — denoted C<a:ah>
 * L<Array::OrdHash> — denoted C<a:oh>
 * L<Data::XHash> — denoted C<d:xh>
-* L<Hash::Ordered> — denoted C<h:o>
+* L<Hash::Ordered> — denoted C<h:o> and marked with "*"
 * L<Tie::Hash::Indexed> — denoted C<t:h:i>
 * L<Tie::IxHash> — denoted C<t:ix>
 * L<Tie::LLHash> — denoted C<t:llh>
@@ -32,7 +39,7 @@ variations are described in each section below.
 
 I conducted benchmarking with the L<Benchmark> module.  The test script is
 in the C<devel> directory of the distribution.  Tests were run on Perl
-5.21.0 (essentially the same as 5.20.0) on a Mac Book Pro.  Each benchmark
+5.20.2 on a Mac Book Pro (darwin-thread-multi-2level).  Each benchmark
 ran for 5 CPU seconds.
 
 Benchmarks were run at several different scales to reveal differences in
@@ -58,6 +65,8 @@ there were different options for creating a hash:
   with the clone option to true ("a:ah_cp").  In another case I created a
   new array reference from the seed list and provided it directly
   ("a:ah_rf").
+* C<Hash::Ordered> can be initialized either with C<new> ("h:o_oo") or via
+  C<tie> ("h:o_th").
 * C<Tie::IxHash> can be initialized either with C<new> ("t:ix_oo") or via
   C<tie> ("t:ix_th").
 * C<Data::XHash> can be created with a list ("t:xh_ls") or an array
@@ -67,41 +76,44 @@ As expected, when C<Array::AsHash> gets an array reference, it's very fast.
 C<Tie::Hash::Indexed> does well here, also.  Of the non-XS, more hash-like
 choices, C<Hash::Ordered> does well.
 
-    Results for ordered hash creation for 10 elements
-               t:h:i 129713/s
-             a:ah_rf 104034/s
-                 h:o 94121/s
-             a:ah_cp 62539/s
-             t:ix_th 60136/s
-             t:ix_oo 59895/s
+Results for ordered hash creation for 10 elements
+               t:h:i 128982/s
+             a:ah_rf 105873/s
+              h:o_oo 81461/s    *
+              h:o_th 79219/s    *
+             t:ix_oo 61948/s
+             t:ix_th 61672/s
+             a:ah_cp 59530/s
                 a:oh 49399/s
-               t:llh 32122/s
-             d:xh_rf 13288/s
-             d:xh_ls 13223/s
+               t:llh 32642/s
+             d:xh_rf 14260/s
+             d:xh_ls 14193/s
 
-    Results for ordered hash creation for 100 elements
-               t:h:i 15026/s
-             a:ah_rf 14304/s
-                 h:o 10931/s
-             a:ah_cp 7512/s
-             t:ix_oo 7368/s
-             t:ix_th 7161/s
-                a:oh 6572/s
-               t:llh 3306/s
-             d:xh_ls 1498/s
-             d:xh_rf 1491/s
+Results for ordered hash creation for 100 elements
+               t:h:i 15807/s
+             a:ah_rf 14453/s
+              h:o_oo 9414/s     *
+              h:o_th 9309/s     *
+             t:ix_th 7391/s
+             t:ix_oo 7318/s
+                a:oh 6646/s
+             a:ah_cp 5552/s
+               t:llh 3408/s
+             d:xh_rf 1593/s
+             d:xh_ls 1589/s
 
-    Results for ordered hash creation for 1000 elements
-             a:ah_rf 1410/s
-               t:h:i 1285/s
-                 h:o 1022/s
-             a:ah_cp 763/s
-             t:ix_oo 703/s
-             t:ix_th 697/s
-                a:oh 694/s
-               t:llh 290/s
-             d:xh_rf 147/s
-             d:xh_ls 146/s
+Results for ordered hash creation for 1000 elements
+             a:ah_rf 1479/s
+               t:h:i 1455/s
+              h:o_th 873/s      *
+              h:o_oo 844/s      *
+             t:ix_oo 760/s
+             t:ix_th 754/s
+             a:ah_cp 752/s
+                a:oh 715/s
+               t:llh 331/s
+             d:xh_ls 160/s
+             d:xh_rf 157/s
 
 =head2 Getting hash elements
 
@@ -116,39 +128,41 @@ method (denoted with "_oo"), tied hash access ("_th") or with a dereference
 Generally, method calls turned out faster than other approaches for a given
 module, demonstrating the inefficiency of tied objects.
 
-    Results for fetching ~10% of 10 elements
-                 h:o 1417712/s
-             d:xh_oo 1231973/s
-             t:ix_oo 1120271/s
-               t:h:i 792250/s
-             d:xh_rf 722683/s
-             t:ix_th 624603/s
-                a:oh 553755/s
-               t:llh 504533/s
-                a:ah 246063/s
+Results for fetching ~10% of 10 elements
+              h:o_oo 1807637/s  *
+             d:xh_oo 1351641/s
+             t:ix_oo 1248157/s
+               t:h:i 947034/s
+              h:o_th 835048/s   *
+             d:xh_rf 721437/s
+             t:ix_th 661992/s
+                a:oh 568502/s
+               t:llh 516942/s
+                a:ah 258923/s
 
-    Results for fetching ~10% of 100 elements
-                 h:o 244800/s
-             d:xh_oo 181520/s
-             t:ix_oo 175981/s
-               t:h:i 132963/s
-             d:xh_rf 93519/s
-             t:ix_th 82154/s
-                a:oh 68270/s
-               t:llh 57013/s
-                a:ah 28280/s
+Results for fetching ~10% of 100 elements
+              h:o_oo 288778/s   *
+             d:xh_oo 182530/s
+             t:ix_oo 165729/s
+               t:h:i 128128/s
+              h:o_th 108201/s   *
+             t:ix_th 83358/s
+             d:xh_rf 69972/s
+                a:oh 69119/s
+               t:llh 58588/s
+                a:ah 27311/s
 
-    Results for fetching ~10% of 1000 elements
-                 h:o 24871/s
-             d:xh_oo 19125/s
-             t:ix_oo 17655/s
-               t:h:i 13407/s
-             d:xh_rf 9590/s
-             t:ix_th 8455/s
-                a:oh 6995/s
-               t:llh 5781/s
-                a:ah 2219/s
-
+Results for fetching ~10% of 1000 elements
+              h:o_oo 29847/s    *
+             d:xh_oo 19056/s
+             t:ix_oo 17098/s
+               t:h:i 13097/s
+              h:o_th 11072/s    *
+             d:xh_rf 9363/s
+             t:ix_th 8339/s
+                a:oh 6901/s
+               t:llh 5911/s
+                a:ah 2748/s
 
 =head2 Setting hash elements
 
@@ -162,39 +176,41 @@ method (denoted with "_oo"), tied hash access ("_th") or with a dereference
 
 Again, methods outperformed.
 
-    Results for replacing ~10% of 10 elements
-                 h:o 1353795/s
-             d:xh_oo 952485/s
-               t:h:i 943983/s
-             t:ix_oo 923874/s
-               t:llh 600717/s
-             d:xh_rf 568693/s
-                a:oh 547233/s
-             t:ix_th 519939/s
-                a:ah 164170/s
+Results for replacing ~10% of 10 elements
+              h:o_oo 1389487/s  *
+               t:h:i 981169/s
+             d:xh_oo 967494/s
+             t:ix_oo 906419/s
+              h:o_th 674507/s   *
+               t:llh 607517/s
+             d:xh_rf 554796/s
+                a:oh 543047/s
+             t:ix_th 524334/s
+                a:ah 159412/s
 
-    Results for replacing ~10% of 100 elements
-                 h:o 197232/s
-               t:h:i 131238/s
-             d:xh_oo 121692/s
-             t:ix_oo 114869/s
-               t:llh 71720/s
-             d:xh_rf 67130/s
-                a:oh 63634/s
-             t:ix_th 59784/s
-                a:ah 16843/s
+Results for replacing ~10% of 100 elements
+              h:o_oo 197605/s   *
+               t:h:i 133501/s
+             d:xh_oo 120446/s
+             t:ix_oo 110297/s
+              h:o_th 84731/s    *
+               t:llh 73805/s
+             d:xh_rf 65410/s
+                a:oh 64499/s
+             t:ix_th 48432/s
+                a:ah 16573/s
 
-    Results for replacing ~10% of 1000 elements
-                 h:o 20364/s
-               t:h:i 13254/s
-             d:xh_oo 12512/s
-             t:ix_oo 11542/s
-               t:llh 7295/s
-             d:xh_rf 7004/s
-                a:oh 6376/s
-             t:ix_th 6175/s
-                a:ah 1635/s
-
+Results for replacing ~10% of 1000 elements
+              h:o_oo 20366/s    *
+               t:h:i 13805/s
+             d:xh_oo 12302/s
+             t:ix_oo 11241/s
+              h:o_th 8539/s     *
+               t:llh 7485/s
+             d:xh_rf 6792/s
+                a:oh 6596/s
+             t:ix_th 6132/s
+                a:ah 1641/s
 
 =head2 Adding hash elements
 
@@ -212,39 +228,41 @@ using C<tied> and a method call:
 Generally, it seemed like the differences were smaller than for other
 benchmarks.  Methods still outperformed.
 
-    Results for adding 10 elements to empty hash
-                 h:o 367588/s
-               t:h:i 300357/s
-             t:ix_oo 263158/s
-             t:ix_th 214085/s
-               t:llh 187981/s
-                a:oh 141308/s
-                a:ah 96523/s
-             d:xh_oo 87498/s
-             d:xh_rf 84316/s
+Results for adding 10 elements to empty hash
+              h:o_oo 332252/s   *
+               t:h:i 295026/s
+             t:ix_oo 251117/s
+              h:o_th 244197/s   *
+             t:ix_th 210624/s
+               t:llh 186667/s
+                a:oh 137321/s
+                a:ah 113216/s
+             d:xh_oo 87559/s
+             d:xh_rf 81455/s
 
-    Results for adding 100 elements to empty hash
-                 h:o 66495/s
-               t:h:i 57307/s
-             t:ix_oo 49676/s
-             t:ix_th 38222/s
-                a:oh 35476/s
-               t:llh 27998/s
-             d:xh_oo 24371/s
-             d:xh_rf 22326/s
-                a:ah 14114/s
+Results for adding 100 elements to empty hash
+              h:o_oo 59359/s    *
+               t:h:i 57851/s
+             t:ix_oo 46438/s
+              h:o_th 42761/s    *
+             t:ix_th 38606/s
+                a:oh 35236/s
+               t:llh 25875/s
+             d:xh_oo 24931/s
+             d:xh_rf 22013/s
+                a:ah 13754/s
 
-    Results for adding 1000 elements to empty hash
-                 h:o 7217/s
-               t:h:i 6244/s
-             t:ix_oo 5671/s
-                a:oh 4335/s
-             t:ix_th 4313/s
-             d:xh_oo 2977/s
-               t:llh 2899/s
-             d:xh_rf 2683/s
-                a:ah 1466/s
-
+Results for adding 1000 elements to empty hash
+               t:h:i 5655/s
+              h:o_oo 5232/s     *
+             t:ix_oo 5059/s
+             t:ix_th 4126/s
+                a:oh 3763/s
+              h:o_th 3473/s     *
+               t:llh 2728/s
+             d:xh_oo 2436/s
+             d:xh_rf 2434/s
+                a:ah 1310/s
 
 =head2 Deleting hash elements
 
@@ -268,39 +286,41 @@ C<Hash::Ordered> does linear search deleting a key, which is slow at larger
 sizes.  C<Tie::LLHash> really shines at larger sizes as deleting from a
 linked list is faster than splicing out an element of an array.
 
-    Results for creating 10 element hash then deleting ~10%
-               t:h:i 139517/s
-                 h:o 95284/s
-                a:ah 66495/s
-             t:ix_oo 52892/s
-             t:ix_th 50254/s
-                a:oh 45609/s
-               t:llh 28599/s
-             d:xh_rf 13223/s
-             d:xh_oo 13173/s
+Results for creating 10 element hash then deleting ~10%
+               t:h:i 129737/s
+              h:o_oo 81617/s    *
+              h:o_th 72121/s    *
+                a:ah 61683/s
+             t:ix_oo 51891/s
+             t:ix_th 49217/s
+                a:oh 43608/s
+               t:llh 28101/s
+             d:xh_oo 12547/s
+             d:xh_rf 12522/s
 
-    Results for creating 100 element hash then deleting ~10%
-               t:h:i 16745/s
-                 h:o 6924/s
-             t:ix_oo 4063/s
-                a:oh 3963/s
-             t:ix_th 3590/s
-                a:ah 3014/s
-               t:llh 2459/s
-             d:xh_oo 1449/s
-             d:xh_rf 1434/s
+Results for creating 100 element hash then deleting ~10%
+               t:h:i 15657/s
+              h:o_oo 8145/s     *
+              h:o_th 7569/s     *
+                a:oh 5044/s
+             t:ix_oo 4947/s
+             t:ix_th 4749/s
+                a:ah 3600/s
+               t:llh 2999/s
+             d:xh_oo 1418/s
+             d:xh_rf 1374/s
 
-    Results for creating 1000 element hash then deleting ~10%
-               t:h:i 1604/s
-               t:llh 269/s
-                a:oh 171/s
-             d:xh_rf 146/s
-                 h:o 144/s
-             d:xh_oo 130/s
-             t:ix_oo 85/s
-             t:ix_th 77/s
+Results for creating 1000 element hash then deleting ~10%
+               t:h:i 1493/s
+              h:o_oo 752/s      *
+              h:o_th 698/s      *
+               t:llh 298/s
+                a:oh 213/s
+             d:xh_oo 139/s
+             d:xh_rf 137/s
+             t:ix_oo 64/s
+             t:ix_th 63/s
                 a:ah 36/s
-
 
 =head2 Extracting the hash as a list
 
@@ -317,49 +337,49 @@ it longhand:
 Because C<Array::AsHash> keeps its internal representation as an ordered
 list of pairs, it outperforms the rest handily.
 
-    Results for listing pairs of 10 element hash
-                a:ah 290725/s
-                 h:o 170187/s
-             t:ix_oo 92118/s
-               t:h:i 80408/s
-             t:ix_th 48756/s
-               t:llh 38509/s
-                a:oh 36126/s
-                d:xh 35766/s
+Results for listing pairs of 10 element hash
+                a:ah 322132/s
+              h:o_oo 147906/s   *
+             t:ix_oo 82783/s
+               t:h:i 73645/s
+              h:o_th 49342/s    *
+                a:oh 46406/s
+             t:ix_th 45253/s
+               t:llh 35747/s
+                d:xh 35658/s
 
-    Results for listing pairs of 100 element hash
-                a:ah 39222/s
-                 h:o 18839/s
-             t:ix_oo 9525/s
-               t:h:i 7742/s
-                a:oh 5081/s
-             t:ix_th 5014/s
-                d:xh 4160/s
-               t:llh 3841/s
+Results for listing pairs of 100 element hash
+                a:ah 33566/s
+              h:o_oo 16587/s    *
+             t:ix_oo 8515/s
+               t:h:i 7189/s
+              h:o_th 5549/s     *
+                a:oh 4687/s
+             t:ix_th 4567/s
+                d:xh 3830/s
+               t:llh 3580/s
 
-    Results for listing pairs of 1000 element hash
-                a:ah 3703/s
-                 h:o 1877/s
-             t:ix_oo 961/s
-               t:h:i 768/s
-                a:oh 508/s
-             t:ix_th 505/s
-                d:xh 413/s
-               t:llh 385/s
+Results for listing pairs of 1000 element hash
+                a:ah 3334/s
+              h:o_oo 1610/s     *
+             t:ix_oo 824/s
+               t:h:i 713/s
+              h:o_th 559/s      *
+                a:oh 485/s
+             t:ix_th 450/s
+                d:xh 390/s
+               t:llh 348/s
 
 =head1 CONCLUSION
 
 With the exception of hash creation and element deletion, C<Hash::Ordered>
-consistently outperformed the other ordered hash implementations.  Even for
+generally outperformed the other ordered hash implementations.  Even for
 creation, it was the fastest of the pure-Perl, hash-based implementations,
 often by a large margin.
 
-However, C<Hash::Ordered> deletion gets worse as the hash size grows large.
-This was an intentional trade-off, as keeping an index of keys to allow
-faster deletion would slow down other operations.  I think large-scale key
-deletion is probably rare in practice, but frequently using the C<push> or
-C<unshift> methods on existing keys to move them to the end/start of the
-list will have similar performance problems.
+In the original release of C<Hash::Ordered>, deletion got worse as the hash
+size grew.  The new JIT indexing with tombstones now makes deletion far
+faster than any pure-Perl implementation.
 
 C<Array::AsHash>, with the opposite internal implementation compared to
 C<Hash::Ordered>, performs best at creation and listing pairs, but is dead
@@ -370,13 +390,14 @@ access and have lots of creation/serialization, it could still be a useful
 choice.
 
 Generally, every module that depends on C<tie> for some portion of its
-implementation pays a substantial performance penalty.
-C<Tie::Hash::Indexed> — likely because of its XS implementation — performs
-decently, but not well enough in my opinion to justify its use.
+implementation pays a substantial performance penalty.  Comparing
+C<Hash::Ordered> benchmarks with and without C<tie> for individual element
+operations shows how severe this penalty can be.  C<Tie::Hash::Indexed> —
+likely because of its XS implementation — performs decently, but not well
+enough in my opinion to justify its use.
 
-As the author of C<Hash::Ordered>, I'm clearly biased, but unless you have
-very large hashes with lots of deletes, I think these benchmarks make a
-very good case for it being the "go to" module for general-purpose ordered
-hashes.
+As the author of C<Hash::Ordered>, I'm clearly biased, but I think these
+benchmarks make a very good case for it being the "go to" module for
+pure-Perl, general-purpose ordered hashes.
 
 =cut

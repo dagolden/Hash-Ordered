@@ -54,8 +54,12 @@ for my $size ( @{ NUMS() } ) {
 
     my %mark;
 
-    $mark{"h:o"} = sub {
+    $mark{"h:o_oo"} = sub {
         my $h = Hash::Ordered->new( @{ $PAIRS{$size} } );
+    };
+
+    $mark{"h:o_th"} = sub {
+        tie my %h, 'Hash::Ordered', @{ $PAIRS{$size} };
     };
 
     $mark{"t:ix_oo"} = sub {
@@ -110,6 +114,7 @@ for my $size ( @{ NUMS() } ) {
     my $aah    = Array::AsHash->new( { array => [ @{ $PAIRS{$size} } ] } );
     my $dxh    = Data::XHash::xh( @{ $PAIRS{$size} } );
     my $aoh    = Array::OrdHash->new( @{ $PAIRS{$size} } );
+    tie my %ho_th,  'Hash::Ordered',      @{ $PAIRS{$size} };
     tie my %tix_th, 'Tie::IxHash',        @{ $PAIRS{$size} };
     tie my %tllh,   'Tie::LLHash',        @{ $PAIRS{$size} };
     tie my %thi,    'Tie::Hash::Indexed', @{ $PAIRS{$size} };
@@ -120,7 +125,8 @@ for my $size ( @{ NUMS() } ) {
     my $n = int( .1 * scalar @keys ) || 1;
     my @lookup = map { $keys[ int( rand( scalar @keys ) ) ] } 1 .. $n;
 
-    $mark{"h:o"}     = sub { $v = $oh->get($_)       for @lookup };
+    $mark{"h:o_oo"}  = sub { $v = $oh->get($_)       for @lookup };
+    $mark{"h:o_th"}  = sub { $v = $ho_th{$_}         for @lookup };
     $mark{"t:ix_oo"} = sub { $v = $tix_oo->FETCH($_) for @lookup };
     $mark{"t:ix_th"} = sub { $v = $tix_th{$_}        for @lookup };
     $mark{"t:llh"}   = sub { $v = $tllh{$_}          for @lookup };
@@ -146,6 +152,7 @@ for my $size ( @{ NUMS() } ) {
     my $aah    = Array::AsHash->new( { array => [ @{ $PAIRS{$size} } ] } );
     my $dxh    = Data::XHash::xh( @{ $PAIRS{$size} } );
     my $aoh    = Array::OrdHash->new( @{ $PAIRS{$size} } );
+    tie my %ho_th,  'Hash::Ordered',      @{ $PAIRS{$size} };
     tie my %tix_th, 'Tie::IxHash',        @{ $PAIRS{$size} };
     tie my %tllh,   'Tie::LLHash',        @{ $PAIRS{$size} };
     tie my %thi,    'Tie::Hash::Indexed', @{ $PAIRS{$size} };
@@ -157,7 +164,8 @@ for my $size ( @{ NUMS() } ) {
     my @lookup = map { $keys[ int( rand( scalar @keys ) ) ] } 1 .. $n;
     my $new_value = irand();
 
-    $mark{"h:o"} = sub { $oh->set( $_, $new_value ) for @lookup };
+    $mark{"h:o_oo"} = sub { $oh->set( $_, $new_value ) for @lookup };
+    $mark{"h:o_th"} = sub { $ho_th{$_} = $new_value for @lookup };
     $mark{"t:ix_oo"} = sub { $tix_oo->STORE( $_, $new_value ) for @lookup };
     $mark{"t:ix_th"} = sub { $tix_th{$_} = $new_value for @lookup };
     $mark{"t:llh"}   = sub { $tllh{$_}   = $new_value for @lookup };
@@ -183,9 +191,15 @@ for my $size ( @{ NUMS() } ) {
 
     my $n = int( .1 * scalar @keys ) || 1;
 
-    $mark{"h:o"} = sub {
+    $mark{"h:o_oo"} = sub {
         my $oh = Hash::Ordered->new;
         $oh->set( irand(), 42 ) for 1 .. $n;
+    };
+
+    $mark{"h:o_th"} = sub {
+        tie my %ho_th, 'Hash::Ordered';
+        $ho_th{ irand() } = 42 for 1 .. $n
+
     };
 
     $mark{"t:ix_oo"} = sub {
@@ -250,9 +264,14 @@ for my $size ( @{ NUMS() } ) {
     my $n = int( .1 * scalar @keys ) || 1;
     my @lookup = map { $keys[ int( rand( scalar @keys ) ) ] } 1 .. $n;
 
-    $mark{"h:o"} = sub {
+    $mark{"h:o_oo"} = sub {
         my $oh = Hash::Ordered->new( @{ $PAIRS{$size} } );
         $oh->delete($_) for @lookup;
+    };
+
+    $mark{"h:o_th"} = sub {
+        tie my %ho_th, 'Hash::Ordered', @{ $PAIRS{$size} };
+        delete $ho_th{$_} for @lookup;
     };
 
     $mark{"t:ix_oo"} = sub {
@@ -311,13 +330,15 @@ for my $size ( @{ NUMS() } ) {
     my $aah    = Array::AsHash->new( { array => [ @{ $PAIRS{$size} } ] } );
     my $dxh    = Data::XHash::xh( @{ $PAIRS{$size} } );
     my $aoh    = Array::OrdHash->new( @{ $PAIRS{$size} } );
+    tie my %ho_th,  'Hash::Ordered',      @{ $PAIRS{$size} };
     tie my %tix_th, 'Tie::IxHash',        @{ $PAIRS{$size} };
     tie my %tllh,   'Tie::LLHash',        @{ $PAIRS{$size} };
     tie my %thi,    'Tie::Hash::Indexed', @{ $PAIRS{$size} };
 
     my ( %mark, @list );
 
-    $mark{"h:o"} = sub { @list = $oh->as_list };
+    $mark{"h:o_oo"} = sub { @list = $oh->as_list };
+    $mark{"h:o_th"} = sub { @list = %ho_th };
     $mark{"t:ix_oo"} = sub {
         @list = map { $_ => $tix_oo->FETCH($_) } $tix_oo->Keys;
     };
