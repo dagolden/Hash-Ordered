@@ -660,6 +660,12 @@ sub SCALAR {
     @value_slice = $oh->values(  qw/c f/ ); # qw/3 6/
     @pairs_slice = $oh->as_list( qw/f e/ ); # qw/f 6 e 5/
 
+    $oh->postinc( 'a' );          # like $oh{a}++
+    $oh->add( 'a', 5 );           # like $oh{a} += 5
+    $oh->concat( 'a', 'hello' );  # like $oh{a} .= 'hello'
+    $oh->or_equals( 'g', '23' );  # like $oh{g} ||= 23
+    $oh->dor_equals( 'g', '23' ); # like $oh{g} //= 23
+
 =head1 DESCRIPTION
 
 This module implements an ordered hash, meaning that it associates keys with
