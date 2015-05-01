@@ -413,7 +413,8 @@ list of keys is provided, the iterator walks the hash in that order. Unknown
 keys will return C<undef>.
 
 The list of keys to return is set when the iterator is generator.  Keys added
-later will not be returned.  Delete keys will return C<undef>.
+later will not be returned.  Subsequently deleted keys will return C<undef>
+for the value.
 
 =cut
 
@@ -430,7 +431,7 @@ sub iterator {
 
 =method preinc
 
-    $oh->inc($key);      # like ++$hash{$key}
+    $oh->preinc($key);      # like ++$hash{$key}
 
 This method is sugar for incrementing a key without having to call C<set> and
 C<get> explicitly. It returns the new value.
@@ -445,7 +446,7 @@ sub preinc {
 
 =method postinc
 
-    $oh->postinc($key);      # like $hash{$key}++
+    $oh->postinc($key);     # like $hash{$key}++
 
 This method is sugar for incrementing a key without having to call C<set> and
 C<get> explicitly.  It returns the old value.
@@ -490,7 +491,7 @@ sub postdec {
 
 =method add
 
-    $oh->add($key, $n);  # like $hash{$key} += $n
+    $oh->add($key, $n);     # like $hash{$key} += $n
 
 This method is sugar for adding a value to a key without having to call
 C<set> and C<get> explicitly. With no value to add, it is treated as "0".
@@ -729,11 +730,12 @@ If you want to access the underlying object for method calls, use C<tied>:
 =head2 Deletion and order modification with push, pop, etc.
 
 This can be expensive, as the ordered list of keys has to be updated.  For
-small hashes, keys are found and spliced out with linear search.  As an
-optimization for larger hashes, the first change to the ordered list of keys
-will construct an index the list of keys.  Thereafter, removed keys
-will be marked with a "tombstone" record.  Tombstones will be garbage collected
-whenever the number of tombstones exceeds the number of valid keys.
+small hashes with no more than 25 keys, keys are found and spliced out with
+linear search.  As an optimization for larger hashes, the first change to the
+ordered list of keys will construct an index to the list of keys.  Thereafter,
+removed keys will be marked with a "tombstone" record.  Tombstones will be
+garbage collected whenever the number of tombstones exceeds the number of valid
+keys.
 
 These internal implementation details largely shouldn't concern you.  The
 important things to note are:
@@ -778,14 +780,11 @@ benchmarking results, see L<Hash::Ordered::Benchmarks>.
 =head2 Tie modules
 
 The following modules offer some sort of tie interface.  I don't like ties, in
-general, because of the extra indirection involved over a direct method call, but
-if you are willing to pay that penalty, you might want to try one of these.
+general, because of the extra indirection involved over a direct method call,
+but if you are willing to pay that penalty, you might want to try one of these.
 
 L<Tie::IxHash> is probably the most well known and includes an OO API.  If its
 warts and performance profile aren't a problem, it might serve.
-
-L<Tie::LLHash> I haven't used, but the linked-list implementation might be
-worthwhile if you expect to do a lot of deletions.
 
 L<Tie::Hash::Indexed> is implemented in XS and thus seems promising if pure-Perl
 isn't a criterion; it often fails tests on Perl 5.18 and above due to the hash
@@ -794,10 +793,10 @@ randomization change.
 These other modules have very specific designs/limitations and I didn't find
 any of them suitable for general purpose use:
 
-=for :list
 * L<Tie::Array::AsHash> — array elements split with separator; tie API only
 * L<Tie::Hash::Array> — ordered alphabetically; tie API only
 * L<Tie::InsertOrderHash> — ordered by insertion; tie API only
+* L<Tie::LLHash> — linked-list implementation; quite slow
 * L<Tie::StoredOrderHash> — ordered by last update; tie API only
 
 =head2 Other ordered hash modules
