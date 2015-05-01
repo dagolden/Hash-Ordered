@@ -76,7 +76,7 @@ As expected, when C<Array::AsHash> gets an array reference, it's very fast.
 C<Tie::Hash::Indexed> does well here, also.  Of the non-XS, more hash-like
 choices, C<Hash::Ordered> does well.
 
-Results for ordered hash creation for 10 elements
+    Results for ordered hash creation for 10 elements
                t:h:i 128982/s
              a:ah_rf 105873/s
               h:o_oo 81461/s    *
@@ -89,7 +89,7 @@ Results for ordered hash creation for 10 elements
              d:xh_rf 14260/s
              d:xh_ls 14193/s
 
-Results for ordered hash creation for 100 elements
+    Results for ordered hash creation for 100 elements
                t:h:i 15807/s
              a:ah_rf 14453/s
               h:o_oo 9414/s     *
@@ -102,7 +102,7 @@ Results for ordered hash creation for 100 elements
              d:xh_rf 1593/s
              d:xh_ls 1589/s
 
-Results for ordered hash creation for 1000 elements
+    Results for ordered hash creation for 1000 elements
              a:ah_rf 1479/s
                t:h:i 1455/s
               h:o_th 873/s      *
@@ -128,7 +128,7 @@ method (denoted with "_oo"), tied hash access ("_th") or with a dereference
 Generally, method calls turned out faster than other approaches for a given
 module, demonstrating the inefficiency of tied objects.
 
-Results for fetching ~10% of 10 elements
+    Results for fetching ~10% of 10 elements
               h:o_oo 1807637/s  *
              d:xh_oo 1351641/s
              t:ix_oo 1248157/s
@@ -140,7 +140,7 @@ Results for fetching ~10% of 10 elements
                t:llh 516942/s
                 a:ah 258923/s
 
-Results for fetching ~10% of 100 elements
+    Results for fetching ~10% of 100 elements
               h:o_oo 288778/s   *
              d:xh_oo 182530/s
              t:ix_oo 165729/s
@@ -152,7 +152,7 @@ Results for fetching ~10% of 100 elements
                t:llh 58588/s
                 a:ah 27311/s
 
-Results for fetching ~10% of 1000 elements
+    Results for fetching ~10% of 1000 elements
               h:o_oo 29847/s    *
              d:xh_oo 19056/s
              t:ix_oo 17098/s
@@ -176,7 +176,7 @@ method (denoted with "_oo"), tied hash access ("_th") or with a dereference
 
 Again, methods outperformed.
 
-Results for replacing ~10% of 10 elements
+    Results for replacing ~10% of 10 elements
               h:o_oo 1389487/s  *
                t:h:i 981169/s
              d:xh_oo 967494/s
@@ -188,7 +188,7 @@ Results for replacing ~10% of 10 elements
              t:ix_th 524334/s
                 a:ah 159412/s
 
-Results for replacing ~10% of 100 elements
+    Results for replacing ~10% of 100 elements
               h:o_oo 197605/s   *
                t:h:i 133501/s
              d:xh_oo 120446/s
@@ -200,7 +200,7 @@ Results for replacing ~10% of 100 elements
              t:ix_th 48432/s
                 a:ah 16573/s
 
-Results for replacing ~10% of 1000 elements
+    Results for replacing ~10% of 1000 elements
               h:o_oo 20366/s    *
                t:h:i 13805/s
              d:xh_oo 12302/s
@@ -228,7 +228,7 @@ using C<tied> and a method call:
 Generally, it seemed like the differences were smaller than for other
 benchmarks.  Methods still outperformed.
 
-Results for adding 10 elements to empty hash
+    Results for adding 10 elements to empty hash
               h:o_oo 332252/s   *
                t:h:i 295026/s
              t:ix_oo 251117/s
@@ -240,7 +240,7 @@ Results for adding 10 elements to empty hash
              d:xh_oo 87559/s
              d:xh_rf 81455/s
 
-Results for adding 100 elements to empty hash
+    Results for adding 100 elements to empty hash
               h:o_oo 59359/s    *
                t:h:i 57851/s
              t:ix_oo 46438/s
@@ -252,7 +252,7 @@ Results for adding 100 elements to empty hash
              d:xh_rf 22013/s
                 a:ah 13754/s
 
-Results for adding 1000 elements to empty hash
+    Results for adding 1000 elements to empty hash
                t:h:i 5655/s
               h:o_oo 5232/s     *
              t:ix_oo 5059/s
@@ -286,7 +286,7 @@ C<Hash::Ordered> does linear search deleting a key, which is slow at larger
 sizes.  C<Tie::LLHash> really shines at larger sizes as deleting from a
 linked list is faster than splicing out an element of an array.
 
-Results for creating 10 element hash then deleting ~10%
+    Results for creating 10 element hash then deleting ~10%
                t:h:i 129737/s
               h:o_oo 81617/s    *
               h:o_th 72121/s    *
@@ -298,7 +298,7 @@ Results for creating 10 element hash then deleting ~10%
              d:xh_oo 12547/s
              d:xh_rf 12522/s
 
-Results for creating 100 element hash then deleting ~10%
+    Results for creating 100 element hash then deleting ~10%
                t:h:i 15657/s
               h:o_oo 8145/s     *
               h:o_th 7569/s     *
@@ -310,7 +310,7 @@ Results for creating 100 element hash then deleting ~10%
              d:xh_oo 1418/s
              d:xh_rf 1374/s
 
-Results for creating 1000 element hash then deleting ~10%
+    Results for creating 1000 element hash then deleting ~10%
                t:h:i 1493/s
               h:o_oo 752/s      *
               h:o_th 698/s      *
@@ -337,7 +337,7 @@ it longhand:
 Because C<Array::AsHash> keeps its internal representation as an ordered
 list of pairs, it outperforms the rest handily.
 
-Results for listing pairs of 10 element hash
+    Results for listing pairs of 10 element hash
                 a:ah 322132/s
               h:o_oo 147906/s   *
              t:ix_oo 82783/s
@@ -348,7 +348,7 @@ Results for listing pairs of 10 element hash
                t:llh 35747/s
                 d:xh 35658/s
 
-Results for listing pairs of 100 element hash
+    Results for listing pairs of 100 element hash
                 a:ah 33566/s
               h:o_oo 16587/s    *
              t:ix_oo 8515/s
@@ -359,7 +359,7 @@ Results for listing pairs of 100 element hash
                 d:xh 3830/s
                t:llh 3580/s
 
-Results for listing pairs of 1000 element hash
+    Results for listing pairs of 1000 element hash
                 a:ah 3334/s
               h:o_oo 1610/s     *
              t:ix_oo 824/s

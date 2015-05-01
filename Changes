@@ -2,6 +2,10 @@ Revision history for Hash-Ordered
 
 {{$NEXT}}
 
+    [Documentation]
+
+    - Fixed formatting of benchmark results.
+
 0.005     2015-05-01 04:59:00-04:00 America/New_York (TRIAL RELEASE)
 
     [Added]
