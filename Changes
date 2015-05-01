@@ -2,6 +2,35 @@ Revision history for Hash-Ordered
 
 {{$NEXT}}
 
+    [Added]
+
+    - Added 'preinc', 'postinc', 'predec', 'postdec', 'add', 'subtract',
+      'concat', 'or_equals' and 'dor_equals' functions for efficient
+      in-place modification of hash elements.
+
+    [Changed]
+
+    - The 'keys' method in scalar context now returns an optimized
+      count of keys.
+
+    [Fixed]
+
+    - Keys in the internal ordered list of keys are now stringified so
+      they are in exactly the same form as they would be in a Perl hash.
+      This slows construction slightly, but is necessary for correctness.
+
+    - Added explicit stringification and numification overloads to mimic an
+      unoverloaded object rather than falling back on the result of
+      boolification.
+
+    [Optimized]
+
+    - Added indexed tombstone deletion for hashes over 25 elements; this
+      makes deletion faster than all other pure-Perl ordered hash
+      implementations that I benchmarked.
+
+    - Numerous functions micro-optimized, including get and set.
+
 0.004     2015-04-24 11:45:23-04:00 America/New_York
 
     - No changes from 0.003-TRIAL
