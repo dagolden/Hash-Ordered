@@ -10,12 +10,12 @@ our $VERSION = '0.006'; # TRIAL
 use Carp ();
 
 use constant {
-    _DATA => 0, # unordered data
-    _KEYS => 1, # ordered keys
-    _INDX => 2, # index into _KEYS (on demand)
-    _OFFS => 3, # index offset for optimized shift/unshift
-    _GCNT => 4, # garbage count
-    _ITER => 5, # for tied hash support
+    _DATA => 0,         # unordered data
+    _KEYS => 1,         # ordered keys
+    _INDX => 2,         # index into _KEYS (on demand)
+    _OFFS => 3,         # index offset for optimized shift/unshift
+    _GCNT => 4,         # garbage count
+    _ITER => 5,         # for tied hash support
 };
 
 use constant {
@@ -795,6 +795,7 @@ randomization change.
 These other modules have very specific designs/limitations and I didn't find
 any of them suitable for general purpose use:
 
+=for :list
 * L<Tie::Array::AsHash> — array elements split with separator; tie API only
 * L<Tie::Hash::Array> — ordered alphabetically; tie API only
 * L<Tie::InsertOrderHash> — ordered by insertion; tie API only
