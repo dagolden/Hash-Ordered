@@ -167,7 +167,11 @@ subtest "list methods" => sub {
         my $hash = new_ok( HO, \@pairs );
         $hash->delete(3); # trigger tombstone on large hash
         splice @pairs, 2, 2; # delete '3' and '4'
-        my $hsize = $hash->keys;
+        my $hsize       = $hash->keys;
+        my $vsize       = $hash->values;
+        my $actual_size =()= keys %{ $hash->[0] };
+        is( $hsize, $actual_size, "keys gives size in scalar context" );
+        is( $vsize, $actual_size, "values gives size in scalar context" );
 
         is( $hash->push( b => 2, c => 3 ), $hsize + 2, "pushing 2 new pairs" );
 

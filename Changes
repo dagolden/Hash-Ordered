@@ -2,6 +2,11 @@ Revision history for Hash-Ordered
 
 {{$NEXT}}
 
+    [Changed]
+
+    - The 'values' method in scalar context now returns an optimized
+      count of elements
+
     [Documentation]
 
     - Fixed formatting of benchmark results.

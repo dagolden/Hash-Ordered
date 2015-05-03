@@ -142,7 +142,10 @@ will be returned for that value.
 sub values {
     my ( $self, @keys ) = @_;
     return
-      map { $self->[_DATA]{$_} } ( @keys ? @keys : grep !ref($_), @{ $self->[_KEYS] } );
+      wantarray
+      ? ( map { $self->[_DATA]{$_} }
+          ( @keys ? @keys : grep !ref($_), @{ $self->[_KEYS] } ) )
+      : @{ $self->[_KEYS] } - $self->[_GCNT];
 }
 
 =method get
