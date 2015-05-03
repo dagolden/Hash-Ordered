@@ -114,7 +114,7 @@ sub clone {
     $size = $oh->keys;
 
 In list context, returns the ordered list of keys.  In scalar context, returns
-the number of keys.
+the number of elements.
 
 Current API available since 0.005.
 
@@ -136,6 +136,10 @@ Returns an ordered list of values.  If no arguments are given, returns
 the ordered values of the entire hash.  If a list of keys is given, returns
 values in order corresponding to those keys.  If a key does not exist, C<undef>
 will be returned for that value.
+
+In scalar context, returns the number of elements.
+
+Current API available since 0.006.
 
 =cut
 
@@ -260,7 +264,7 @@ sub delete {
 Removes all key-value pairs from the hash.  Returns undef in scalar context
 or an empty list in list context.
 
-Added in version 0.003.
+Current API available since 0.003.
 
 =cut
 
@@ -730,6 +734,8 @@ If you want to access the underlying object for method calls, use C<tied>:
 
     tied( %hash )->unshift( @data );
 
+Tied hash API available since 0.005.
+
 =head1 CAVEATS
 
 =head2 Deletion and order modification with push, pop, etc.
@@ -795,8 +801,8 @@ L<Tie::Hash::Indexed> is implemented in XS and thus seems promising if pure-Perl
 isn't a criterion; it often fails tests on Perl 5.18 and above due to the hash
 randomization change.
 
-These other modules have very specific designs/limitations and I didn't find
-any of them suitable for general purpose use:
+These other modules below have very specific designs/limitations and I didn't
+find any of them suitable for general purpose use:
 
 =for :list
 * L<Tie::Array::AsHash> — array elements split with separator; tie API only
@@ -810,17 +816,21 @@ any of them suitable for general purpose use:
 Other modules stick with an object-oriented API, with a wide variety of
 implementation approaches.
 
-L<Array::AsHash> is essentially an inverse implementation from Hash::Ordered.
-It keeps pairs in an array and uses a hash to index into the array.  I think
-this indirection makes hash-like operations slower, but getting the list of
-pairs back out is much faster.  It takes an arrayref to initialize, but can
-shallow copy it if needed.  I think this is a reasonable alternative if static
-construction and listing out contents is more common than individual item
-access.
+L<Array::AsHash> is essentially an inverse implementation from
+Hash::Ordered.  It keeps pairs in an array and uses a hash to index into
+the array.  This indirection would already make hash-like operations
+slower, but the specific implementation makes it even worse, with
+abstractions and function calls that make getting or setting individual
+items up to 10x slower than Hash::Ordered.
 
-These other modules have restrictions or particularly complicated
-implementations (often relying on C<tie>) and thus I didn't think any of them
-really suitable for use:
+However, C<Array::AsHash> takes an arrayref to initialize, which is very
+fast and can return the list of pairs faster, too.  If you mostly create
+and list out ordered hashes and very rarely touch individual entries, I
+think this could be something to very cautiously consider.
+
+These other modules below have restrictions or particularly complicated
+implementations (often relying on C<tie>) and thus I didn't think any of
+them really suitable for use:
 
 =for :list
 * L<Array::Assign> — arrays with named access; restricted keys

@@ -8,10 +8,11 @@ ordered keys.  I thought this would perform well for common tasks and
 likely outperform more complicated ordered hash implementations, so I
 decided to do some benchmarking to test it.
 
-B<Note>: since the initial benchmarking, C<Hash::Ordered> gained just-in-time
-indexing of the keys array to support faster tombstone deletion.  It also
-now support C<tie>.  The revised benchmarks include the C<tie> mode
-for consistency with other tied hash implementations.
+B<Note>: since the initial benchmarking, C<Hash::Ordered> gained
+just-in-time indexing of the keys array to support faster tombstone
+deletion, which adds some conditional data structures to the internals.  It
+also now supports C<tie>.  The revised benchmarks include the C<tie> mode
+for comparison with other tied hash implementations.
 
 =head1 MODULES TESTED
 
@@ -275,16 +276,21 @@ Some modules had choices for how to delete a value, usually between a
 method (denoted with "_oo"), tied hash access ("_th") or with a dereference
 ("_rf").
 
-Interestingly, the performance of different modules changes a lot at the
-three different sizes, revealing implementation differences.  (Though
-recall that some of this is the creation performance difference as well as
-deletion difference.)
+The performance changes (or lack thereof) at the three different sizes
+reveals implementation differences.  (Though recall that some of this is
+the creation performance difference as well as deletion difference.)
 
 For example, C<Tie::Hash::Indexed> XS does very well, which could be its
 good creation performance, but could also be good deletion.
-C<Hash::Ordered> does linear search deleting a key, which is slow at larger
-sizes.  C<Tie::LLHash> really shines at larger sizes as deleting from a
+
+C<Hash::Ordered> does linear search deleting a key for the 10 element hash,
+but automatically switches to indexed, tombstone deletion for the larger
+hashes.  When deleting only 10% of keys, garbage collection of tombstoned
+keys never occurs, so that amortized cost is not included.
+
+C<Tie::LLHash> improves at larger sizes as deleting from a
 linked list is faster than splicing out an element of an array.
+Conversely, C<Array::AsHash> just gets worse.
 
     Results for creating 10 element hash then deleting ~10%
                t:h:i 129737/s
@@ -328,14 +334,15 @@ I tested getting an ordered list of pairs from hashes of 10, 100 and 1000
 elements.  The hash was created beforehand so the benchmarks reflect only
 conversion to a list.
 
-Oddly, modules that usually have more than one way to do this don't for
+Oddly, modules that usually have more than one way to do things don't for
 this.  Even C<Tie::IxHash> doesn't really have an OO way to do it, so I did
 it longhand:
 
         @list = map { $_ => $tix_oo->FETCH($_) } $tix_oo->Keys;
 
 Because C<Array::AsHash> keeps its internal representation as an ordered
-list of pairs, it outperforms the rest handily.
+list of pairs, it outperforms the rest handily as it merely needs to
+de-reference that data structure.
 
     Results for listing pairs of 10 element hash
                 a:ah 322132/s
