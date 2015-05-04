@@ -5,13 +5,13 @@ Revision history for Hash-Ordered
     [Changed]
 
     - The 'values' method in scalar context now returns an optimized
-      count of elements
+      count of elements.
 
     [Documentation]
 
-    - Fixed formatting of benchmark results.
+    - Amended various parts of the documentation.
 
-    - Fixed formatting of a SEE ALSO list.
+    - Fixed formatting of benchmark results and a SEE ALSO list.
 
 0.005     2015-05-01 04:59:00-04:00 America/New_York (TRIAL RELEASE)
 
