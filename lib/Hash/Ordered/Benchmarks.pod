@@ -345,37 +345,37 @@ list of pairs, it outperforms the rest handily as it merely needs to
 dereference that data structure.
 
     Results for listing pairs of 10 element hash
-                a:ah 322132/s
-              h:o_oo 147906/s   *
-             t:ix_oo 82783/s
-               t:h:i 73645/s
-              h:o_th 49342/s    *
-                a:oh 46406/s
-             t:ix_th 45253/s
-               t:llh 35747/s
-                d:xh 35658/s
+                a:ah 420751/s
+              h:o_oo 166813/s   *
+             t:ix_oo 85740/s
+               t:h:i 70084/s
+              h:o_th 49250/s    *
+             t:ix_th 45281/s
+                a:oh 45052/s
+                d:xh 37186/s
+               t:llh 34901/s
 
     Results for listing pairs of 100 element hash
-                a:ah 33566/s
-              h:o_oo 16587/s    *
-             t:ix_oo 8515/s
-               t:h:i 7189/s
-              h:o_th 5549/s     *
-                a:oh 4687/s
-             t:ix_th 4567/s
-                d:xh 3830/s
-               t:llh 3580/s
+                a:ah 46877/s
+              h:o_oo 18754/s    *
+             t:ix_oo 8906/s
+               t:h:i 7358/s
+              h:o_th 5620/s     *
+                a:oh 4830/s
+             t:ix_th 4589/s
+                d:xh 4275/s
+               t:llh 3610/s
 
     Results for listing pairs of 1000 element hash
-                a:ah 3334/s
-              h:o_oo 1610/s     *
-             t:ix_oo 824/s
-               t:h:i 713/s
-              h:o_th 559/s      *
-                a:oh 485/s
-             t:ix_th 450/s
-                d:xh 390/s
-               t:llh 348/s
+                a:ah 4652/s
+              h:o_oo 1832/s     *
+             t:ix_oo 857/s
+               t:h:i 710/s
+              h:o_th 530/s      *
+                a:oh 480/s
+             t:ix_th 449/s
+                d:xh 419/s
+               t:llh 326/s
 
 =head1 CONCLUSION
 

@@ -401,8 +401,9 @@ the original will have the value C<undef>.
 
 sub as_list {
     my ( $self, @keys ) = @_;
-    @keys = grep !ref($_), @{ $self->[_KEYS] } unless @keys;
-    return map { ; $_ => $self->[_DATA]{$_} } @keys;
+    return
+      map { ; $_ => $self->[_DATA]{$_} }
+      ( @keys ? @keys : grep !ref($_), @{ $self->[_KEYS] } );
 }
 
 =method iterator

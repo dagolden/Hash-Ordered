@@ -2,6 +2,10 @@ Revision history for Hash-Ordered
 
 {{$NEXT}}
 
+    [Optimized]
+
+    - The 'as_list' method no longer makes a temporary copy of key to list
+
 0.006     2015-05-03 20:48:41-04:00 America/New_York
 
     [Changed]
