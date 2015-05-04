@@ -342,7 +342,7 @@ it longhand:
 
 Because C<Array::AsHash> keeps its internal representation as an ordered
 list of pairs, it outperforms the rest handily as it merely needs to
-de-reference that data structure.
+dereference that data structure.
 
     Results for listing pairs of 10 element hash
                 a:ah 322132/s
