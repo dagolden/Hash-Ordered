@@ -10,12 +10,12 @@ our $VERSION = '0.007';
 use Carp ();
 
 use constant {
-    _DATA => 0,         # unordered data
-    _KEYS => 1,         # ordered keys
-    _INDX => 2,         # index into _KEYS (on demand)
-    _OFFS => 3,         # index offset for optimized shift/unshift
-    _GCNT => 4,         # garbage count
-    _ITER => 5,         # for tied hash support
+    _DATA => 0, # unordered data
+    _KEYS => 1, # ordered keys
+    _INDX => 2, # index into _KEYS (on demand)
+    _OFFS => 3, # index offset for optimized shift/unshift
+    _GCNT => 4, # garbage count
+    _ITER => 5, # for tied hash support
 };
 
 use constant {
