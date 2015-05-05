@@ -2,6 +2,10 @@ Revision history for Hash-Ordered
 
 {{$NEXT}}
 
+    [Optimized]
+
+    - The 'new' method no longer makes a temporary copy of key/value pairs
+
 0.007     2015-05-04 10:57:31-04:00 America/New_York
 
     [Optimized]

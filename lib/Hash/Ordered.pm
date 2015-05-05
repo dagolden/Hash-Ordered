@@ -60,17 +60,18 @@ Constructs an object, with an optional list of key-value pairs.
 =cut
 
 sub new {
-    my ( $class, @pairs ) = @_;
+    my $class = shift;
 
-    return bless [ {}, [], undef, 0, 0 ], $class unless @pairs;
+    return bless [ {}, [], undef, 0, 0 ], $class unless @_;
 
-    Carp::croak("new() requires key-value pairs") unless @pairs % 2 == 0;
+    Carp::croak("new() requires key-value pairs") unless @_ % 2 == 0;
 
     # must stringify keys for _KEYS array
-    my $self = [
-        {@pairs}, [ map { $_ % 2 == 0 ? ("$pairs[$_]") : () } 0 .. $#pairs ],
-        undef, 0, 0
-    ];
+    my @keys;
+    for ( my $i = 0; $i < $#_; $i += 2 ) {
+        push @keys, "$_[$i]";
+    }
+    my $self = [ {@_}, \@keys, undef, 0, 0 ];
 
     return bless $self, $class;
 }
