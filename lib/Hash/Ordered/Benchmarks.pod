@@ -78,43 +78,43 @@ C<Tie::Hash::Indexed> does well here, also.  Of the non-XS, more hash-like
 choices, C<Hash::Ordered> does well.
 
     Results for ordered hash creation for 10 elements
-               t:h:i 128982/s
-             a:ah_rf 105873/s
-              h:o_oo 81461/s    *
-              h:o_th 79219/s    *
-             t:ix_oo 61948/s
-             t:ix_th 61672/s
-             a:ah_cp 59530/s
-                a:oh 49399/s
-               t:llh 32642/s
-             d:xh_rf 14260/s
-             d:xh_ls 14193/s
+               t:h:i   136030/s
+              h:o_oo   125097/s  *
+              h:o_th   117705/s  *
+             a:ah_rf   111411/s
+             t:ix_oo    61853/s
+             t:ix_th    61715/s
+             a:ah_cp    56375/s
+                a:oh    54337/s
+               t:llh    33553/s
+             d:xh_ls    14068/s
+             d:xh_rf    13926/s
 
     Results for ordered hash creation for 100 elements
-               t:h:i 15807/s
-             a:ah_rf 14453/s
-              h:o_oo 9414/s     *
-              h:o_th 9309/s     *
-             t:ix_th 7391/s
-             t:ix_oo 7318/s
-                a:oh 6646/s
-             a:ah_cp 5552/s
-               t:llh 3408/s
-             d:xh_rf 1593/s
-             d:xh_ls 1589/s
+               t:h:i    16503/s
+             a:ah_rf    15398/s
+              h:o_oo    15343/s  *
+              h:o_th    15056/s  *
+                a:oh     7783/s
+             t:ix_th     7570/s
+             t:ix_oo     7405/s
+             a:ah_cp     7035/s
+               t:llh     3533/s
+             d:xh_ls     1561/s
+             d:xh_rf     1550/s
 
     Results for ordered hash creation for 1000 elements
-             a:ah_rf 1479/s
-               t:h:i 1455/s
-              h:o_th 873/s      *
-              h:o_oo 844/s      *
-             t:ix_oo 760/s
-             t:ix_th 754/s
-             a:ah_cp 752/s
-                a:oh 715/s
-               t:llh 331/s
-             d:xh_ls 160/s
-             d:xh_rf 157/s
+               t:h:i     1552/s
+             a:ah_rf     1509/s
+              h:o_th     1487/s  *
+              h:o_oo     1479/s  *
+                a:oh      815/s
+             t:ix_th      772/s
+             t:ix_oo      757/s
+             a:ah_cp      684/s
+               t:llh      340/s
+             d:xh_ls      154/s
+             d:xh_rf      152/s
 
 =head2 Getting hash elements
 
@@ -130,40 +130,40 @@ Generally, method calls turned out faster than other approaches for a given
 module, demonstrating the inefficiency of tied objects.
 
     Results for fetching ~10% of 10 elements
-              h:o_oo 1807637/s  *
-             d:xh_oo 1351641/s
-             t:ix_oo 1248157/s
-               t:h:i 947034/s
-              h:o_th 835048/s   *
-             d:xh_rf 721437/s
-             t:ix_th 661992/s
-                a:oh 568502/s
-               t:llh 516942/s
-                a:ah 258923/s
+              h:o_oo  1844781/s  *
+             d:xh_oo  1292883/s
+             t:ix_oo  1187104/s
+               t:h:i   932793/s
+              h:o_th   817346/s  *
+             d:xh_rf   703441/s
+             t:ix_th   649291/s
+                a:oh   560060/s
+               t:llh   514911/s
+                a:ah   260639/s
 
     Results for fetching ~10% of 100 elements
-              h:o_oo 288778/s   *
-             d:xh_oo 182530/s
-             t:ix_oo 165729/s
-               t:h:i 128128/s
-              h:o_th 108201/s   *
-             t:ix_th 83358/s
-             d:xh_rf 69972/s
-                a:oh 69119/s
-               t:llh 58588/s
-                a:ah 27311/s
+              h:o_oo   285983/s  *
+             d:xh_oo   183292/s
+             t:ix_oo   165100/s
+               t:h:i   128713/s
+              h:o_th   107213/s  *
+             d:xh_rf    87049/s
+             t:ix_th    79642/s
+                a:oh    66109/s
+               t:llh    58741/s
+                a:ah    27533/s
 
     Results for fetching ~10% of 1000 elements
-              h:o_oo 29847/s    *
-             d:xh_oo 19056/s
-             t:ix_oo 17098/s
-               t:h:i 13097/s
-              h:o_th 11072/s    *
-             d:xh_rf 9363/s
-             t:ix_th 8339/s
-                a:oh 6901/s
-               t:llh 5911/s
-                a:ah 2748/s
+              h:o_oo    30342/s  *
+             d:xh_oo    19004/s
+             t:ix_oo    17132/s
+               t:h:i    13269/s
+              h:o_th    11100/s  *
+             d:xh_rf     8919/s
+             t:ix_th     7844/s
+                a:oh     6763/s
+               t:llh     5666/s
+                a:ah     2772/s
 
 =head2 Setting hash elements
 
@@ -178,40 +178,40 @@ method (denoted with "_oo"), tied hash access ("_th") or with a dereference
 Again, methods outperformed.
 
     Results for replacing ~10% of 10 elements
-              h:o_oo 1389487/s  *
-               t:h:i 981169/s
-             d:xh_oo 967494/s
-             t:ix_oo 906419/s
-              h:o_th 674507/s   *
-               t:llh 607517/s
-             d:xh_rf 554796/s
-                a:oh 543047/s
-             t:ix_th 524334/s
-                a:ah 159412/s
+              h:o_oo  1378880/s  *
+               t:h:i   945403/s
+             d:xh_oo   941643/s
+             t:ix_oo   887283/s
+              h:o_th   652269/s  *
+               t:llh   590160/s
+             d:xh_rf   537694/s
+                a:oh   530787/s
+             t:ix_th   508001/s
+                a:ah   159258/s
 
     Results for replacing ~10% of 100 elements
-              h:o_oo 197605/s   *
-               t:h:i 133501/s
-             d:xh_oo 120446/s
-             t:ix_oo 110297/s
-              h:o_th 84731/s    *
-               t:llh 73805/s
-             d:xh_rf 65410/s
-                a:oh 64499/s
-             t:ix_th 48432/s
-                a:ah 16573/s
+              h:o_oo   192769/s  *
+               t:h:i   126284/s
+             d:xh_oo   119845/s
+             t:ix_oo   113992/s
+              h:o_th    81159/s  *
+               t:llh    72403/s
+             d:xh_rf    64791/s
+                a:oh    62666/s
+             t:ix_th    59809/s
+                a:ah    16405/s
 
     Results for replacing ~10% of 1000 elements
-              h:o_oo 20366/s    *
-               t:h:i 13805/s
-             d:xh_oo 12302/s
-             t:ix_oo 11241/s
-              h:o_th 8539/s     *
-               t:llh 7485/s
-             d:xh_rf 6792/s
-                a:oh 6596/s
-             t:ix_th 6132/s
-                a:ah 1641/s
+              h:o_oo    19909/s  *
+               t:h:i    13445/s
+             d:xh_oo    12487/s
+             t:ix_oo    11601/s
+              h:o_th     8357/s  *
+               t:llh     7503/s
+             d:xh_rf     6599/s
+                a:oh     6410/s
+             t:ix_th     6118/s
+                a:ah     1651/s
 
 =head2 Adding hash elements
 
@@ -230,40 +230,40 @@ Generally, it seemed like the differences were smaller than for other
 benchmarks.  Methods still outperformed.
 
     Results for adding 10 elements to empty hash
-              h:o_oo 332252/s   *
-               t:h:i 295026/s
-             t:ix_oo 251117/s
-              h:o_th 244197/s   *
-             t:ix_th 210624/s
-               t:llh 186667/s
-                a:oh 137321/s
-                a:ah 113216/s
-             d:xh_oo 87559/s
-             d:xh_rf 81455/s
+              h:o_oo   341022/s  *
+               t:h:i   295079/s
+             t:ix_oo   258981/s
+              h:o_th   245996/s  *
+             t:ix_th   211341/s
+               t:llh   191298/s
+                a:oh   137447/s
+                a:ah   112651/s
+             d:xh_oo    87215/s
+             d:xh_rf    80379/s
 
     Results for adding 100 elements to empty hash
-              h:o_oo 59359/s    *
-               t:h:i 57851/s
-             t:ix_oo 46438/s
-              h:o_th 42761/s    *
-             t:ix_th 38606/s
-                a:oh 35236/s
-               t:llh 25875/s
-             d:xh_oo 24931/s
-             d:xh_rf 22013/s
-                a:ah 13754/s
+              h:o_oo    58519/s  *
+               t:h:i    55166/s
+             t:ix_oo    48658/s
+              h:o_th    42066/s  *
+             t:ix_th    38632/s
+                a:oh    34842/s
+               t:llh    28384/s
+             d:xh_oo    24841/s
+             d:xh_rf    21517/s
+                a:ah    13726/s
 
     Results for adding 1000 elements to empty hash
-               t:h:i 5655/s
-              h:o_oo 5232/s     *
-             t:ix_oo 5059/s
-             t:ix_th 4126/s
-                a:oh 3763/s
-              h:o_th 3473/s     *
-               t:llh 2728/s
-             d:xh_oo 2436/s
-             d:xh_rf 2434/s
-                a:ah 1310/s
+              h:o_oo     6497/s  *
+               t:h:i     6108/s
+             t:ix_oo     5528/s
+              h:o_th     4650/s  *
+             t:ix_th     4329/s
+                a:oh     4233/s
+             d:xh_oo     3121/s
+               t:llh     3011/s
+             d:xh_rf     2696/s
+                a:ah     1423/s
 
 =head2 Deleting hash elements
 
@@ -293,40 +293,40 @@ linked list is faster than splicing out an element of an array.
 Conversely, C<Array::AsHash> just gets worse.
 
     Results for creating 10 element hash then deleting ~10%
-               t:h:i 129737/s
-              h:o_oo 81617/s    *
-              h:o_th 72121/s    *
-                a:ah 61683/s
-             t:ix_oo 51891/s
-             t:ix_th 49217/s
-                a:oh 43608/s
-               t:llh 28101/s
-             d:xh_oo 12547/s
-             d:xh_rf 12522/s
+               t:h:i   131578/s
+              h:o_oo   105670/s  *
+              h:o_th    93237/s  *
+                a:ah    67109/s
+             t:ix_oo    55477/s
+             t:ix_th    52792/s
+                a:oh    46938/s
+               t:llh    30399/s
+             d:xh_oo    13756/s
+             d:xh_rf    13499/s
 
     Results for creating 100 element hash then deleting ~10%
-               t:h:i 15657/s
-              h:o_oo 8145/s     *
-              h:o_th 7569/s     *
-                a:oh 5044/s
-             t:ix_oo 4947/s
-             t:ix_th 4749/s
-                a:ah 3600/s
-               t:llh 2999/s
-             d:xh_oo 1418/s
-             d:xh_rf 1374/s
+               t:h:i    17420/s
+              h:o_oo    10859/s  *
+              h:o_th    10010/s  *
+                a:oh     5738/s
+             t:ix_oo     3922/s
+             t:ix_th     3862/s
+                a:ah     3286/s
+               t:llh     3250/s
+             d:xh_oo     1508/s
+             d:xh_rf     1499/s
 
     Results for creating 1000 element hash then deleting ~10%
-               t:h:i 1493/s
-              h:o_oo 752/s      *
-              h:o_th 698/s      *
-               t:llh 298/s
-                a:oh 213/s
-             d:xh_oo 139/s
-             d:xh_rf 137/s
-             t:ix_oo 64/s
-             t:ix_th 63/s
-                a:ah 36/s
+               t:h:i     1635/s
+              h:o_oo     1074/s  *
+              h:o_th     1004/s  *
+               t:llh      319/s
+                a:oh      204/s
+             d:xh_oo      152/s
+             d:xh_rf      151/s
+             t:ix_oo       78/s
+             t:ix_th       78/s
+                a:ah       40/s
 
 =head2 Extracting the hash as a list
 
@@ -345,37 +345,37 @@ list of pairs, it outperforms the rest handily as it merely needs to
 dereference that data structure.
 
     Results for listing pairs of 10 element hash
-                a:ah 420751/s
-              h:o_oo 166813/s   *
-             t:ix_oo 85740/s
-               t:h:i 70084/s
-              h:o_th 49250/s    *
-             t:ix_th 45281/s
-                a:oh 45052/s
-                d:xh 37186/s
-               t:llh 34901/s
+                a:ah   321044/s
+              h:o_oo   178288/s  *
+             t:ix_oo    89263/s
+               t:h:i    79184/s
+              h:o_th    56112/s  *
+             t:ix_th    48009/s
+                a:oh    47433/s
+               t:llh    37996/s
+                d:xh    37439/s
 
     Results for listing pairs of 100 element hash
-                a:ah 46877/s
-              h:o_oo 18754/s    *
-             t:ix_oo 8906/s
-               t:h:i 7358/s
-              h:o_th 5620/s     *
-                a:oh 4830/s
-             t:ix_th 4589/s
-                d:xh 4275/s
-               t:llh 3610/s
+                a:ah    36399/s
+              h:o_oo    19537/s  *
+             t:ix_oo     9049/s
+               t:h:i     7768/s
+              h:o_th     6254/s  *
+                a:oh     5060/s
+             t:ix_th     4907/s
+                d:xh     4122/s
+               t:llh     3813/s
 
     Results for listing pairs of 1000 element hash
-                a:ah 4652/s
-              h:o_oo 1832/s     *
-             t:ix_oo 857/s
-               t:h:i 710/s
-              h:o_th 530/s      *
-                a:oh 480/s
-             t:ix_th 449/s
-                d:xh 419/s
-               t:llh 326/s
+                a:ah     3784/s
+              h:o_oo     1959/s  *
+             t:ix_oo      905/s
+               t:h:i      773/s
+              h:o_th      625/s  *
+                a:oh      523/s
+             t:ix_th      492/s
+                d:xh      427/s
+               t:llh      377/s
 
 =head1 CONCLUSION
 
