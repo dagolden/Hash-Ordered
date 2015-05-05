@@ -21,7 +21,7 @@ use constant NUMS => [ 10, 100, 1000 ];
 
 STDOUT->autoflush(1);
 
-my %FILTER = map { $_ => 1 } split /,/, $ENV{FILTER};
+my %FILTER = $ENV{FILTER} ? ( map { $_ => 1 } split /,/, $ENV{FILTER} ) : ();
 
 my %PAIRS = (
     map {
@@ -42,7 +42,7 @@ sub time_them {
         $results{$k} = $iter_s;
     }
 
-    printf( "%20s %d/s\n", $_, $results{$_} )
+    printf( "%20s %10s%s\n", $_, int( $results{$_} ) . "/s", $_ =~ /^h:o/ ? "  *" : "" )
       for sort { $results{$b} <=> $results{$a} } keys %results;
 
     say "";
@@ -57,7 +57,7 @@ my %TESTS;
 $TESTS{create} = sub {
     for my $size ( @{ NUMS() } ) {
 
-        say my $title = "Results for ordered hash creation for $size elements";
+        say my $title = "    Results for ordered hash creation for $size elements";
 
         my %mark;
 
@@ -116,7 +116,7 @@ $TESTS{create} = sub {
 $TESTS{get} = sub {
     for my $size ( @{ NUMS() } ) {
 
-        say my $title = "Results for fetching ~10% of $size elements";
+        say my $title = "    Results for fetching ~10% of $size elements";
 
         my $oh     = Hash::Ordered->new( @{ $PAIRS{$size} } );
         my $tix_oo = Tie::IxHash->new( @{ $PAIRS{$size} } );
@@ -156,7 +156,7 @@ $TESTS{get} = sub {
 $TESTS{replace} = sub {
     for my $size ( @{ NUMS() } ) {
 
-        say my $title = "Results for replacing ~10% of $size elements";
+        say my $title = "    Results for replacing ~10% of $size elements";
 
         my $oh     = Hash::Ordered->new( @{ $PAIRS{$size} } );
         my $tix_oo = Tie::IxHash->new( @{ $PAIRS{$size} } );
@@ -197,7 +197,7 @@ $TESTS{replace} = sub {
 $TESTS{add} = sub {
     for my $size ( @{ NUMS() } ) {
 
-        say my $title = "Results for adding $size elements to empty hash";
+        say my $title = "    Results for adding $size elements to empty hash";
 
         my ( %mark, $v );
         my @keys = keys %{ { @{ $PAIRS{$size} } } };
@@ -271,7 +271,7 @@ $TESTS{add} = sub {
 $TESTS{delete} = sub {
     for my $size ( @{ NUMS() } ) {
 
-        say my $title = "Results for creating $size element hash then deleting ~10%";
+        say my $title = "    Results for creating $size element hash then deleting ~10%";
 
         my ( %mark, $v );
         my @keys = keys %{ { @{ $PAIRS{$size} } } };
@@ -340,7 +340,7 @@ $TESTS{delete} = sub {
 $TESTS{list} = sub {
     for my $size ( @{ NUMS() } ) {
 
-        say my $title = "Results for listing pairs of $size element hash";
+        say my $title = "    Results for listing pairs of $size element hash";
 
         my $oh     = Hash::Ordered->new( @{ $PAIRS{$size} } );
         my $tix_oo = Tie::IxHash->new( @{ $PAIRS{$size} } );
@@ -374,7 +374,9 @@ $TESTS{list} = sub {
 # main program
 #--------------------------------------------------------------------------#
 
-for my $run ( @ARGV ? @ARGV : sort keys %TESTS ) {
+my @order = qw/create get replace add delete list/;
+
+for my $run ( @ARGV ? @ARGV : @order ) {
     if ( my $sub = $TESTS{$run} ) {
         $sub->();
     }
