@@ -57,7 +57,7 @@ use overload
 
 Constructs an object, with an optional list of key-value pairs.
 
-The position of a key corresponds to the first occurance in the list, but
+The position of a key corresponds to the first occurrence in the list, but
 the value will be updated if the key is seen more than once.
 
 Current API available since 0.009.
