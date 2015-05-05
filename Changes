@@ -4,13 +4,14 @@ Revision history for Hash-Ordered
 
     [Optimized]
 
-    - The 'new' method no longer makes a temporary copy of key/value pairs
+    - Methods which take lists of keys or key/value pairs no longer makes a
+      temporary copy, which speeds them up substantially for large lists
 
 0.007     2015-05-04 10:57:31-04:00 America/New_York
 
     [Optimized]
 
-    - The 'as_list' method no longer makes a temporary copy of key to list
+    - The 'as_list' method no longer makes a temporary copy of keys to list
 
 0.006     2015-05-03 20:48:41-04:00 America/New_York
 
