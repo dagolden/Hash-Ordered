@@ -90,12 +90,11 @@ in the original will have the value C<undef>.
 
 sub clone {
     my $self = CORE::shift;
-    my @keys = map { "$_" } @_; # stringify keys
     my $clone;
-    if (@keys) {
+    if (@_) {
         my %subhash;
-        @subhash{@keys} = @{ $self->[_DATA] }{@keys};
-        $clone = [ \%subhash, \@keys, undef, 0, 0 ];
+        @subhash{@_} = @{ $self->[_DATA] }{@_};
+        $clone = [ \%subhash, [ map "$_", @_ ], undef, 0, 0 ];
     }
     elsif ( $self->[_INDX] ) {
         $clone =
@@ -145,11 +144,10 @@ Current API available since 0.006.
 =cut
 
 sub values {
-    my ( $self, @keys ) = @_;
+    my $self = CORE::shift;
     return
       wantarray
-      ? ( map { $self->[_DATA]{$_} }
-          ( @keys ? @keys : grep !ref($_), @{ $self->[_KEYS] } ) )
+      ? ( map { $self->[_DATA]{$_} } ( @_ ? @_ : grep !ref($_), @{ $self->[_KEYS] } ) )
       : @{ $self->[_KEYS] } - $self->[_GCNT];
 }
 
@@ -288,10 +286,10 @@ Returns the number of keys after the push is complete.
 =cut
 
 sub push {
-    my ( $self, @pairs ) = @_;
+    my $self = CORE::shift;
     my ( $data, $keys, $indx ) = @$self;
-    while (@pairs) {
-        my ( $k, $v ) = splice( @pairs, 0, 2 );
+    while (@_) {
+        my ( $k, $v ) = splice( @_, 0, 2 );
         $self->delete($k) if exists $data->{$k};
         $data->{$k} = $v;
         CORE::push @$keys, "$k"; # stringify keys
@@ -333,10 +331,10 @@ Returns the number of keys after the unshift is complete.
 =cut
 
 sub unshift {
-    my ( $self, @pairs ) = @_;
+    my $self = CORE::shift;
     my ( $data, $keys, $indx ) = @$self;
-    while (@pairs) {
-        my ( $k, $v ) = splice( @pairs, -2, 2 );
+    while (@_) {
+        my ( $k, $v ) = splice( @_, -2, 2 );
         $self->delete($k) if exists $data->{$k};
         $data->{$k} = $v;
         CORE::unshift @$keys, "$k"; # stringify keys
@@ -376,9 +374,9 @@ the end of the hash.
 =cut
 
 sub merge {
-    my ( $self, @pairs ) = @_;
-    while (@pairs) {
-        my ( $k, $v ) = splice( @pairs, -2, 2 );
+    my $self = CORE::shift;
+    while (@_) {
+        my ( $k, $v ) = splice( @_, -2, 2 );
         if ( !exists $self->[_DATA]{$k} ) {
             my $size = CORE::push @{ $self->[_KEYS] }, "$k"; # stringify key
             $self->[_INDX]{$k} = $size - 1 if $self->[_INDX];
@@ -401,10 +399,10 @@ the original will have the value C<undef>.
 =cut
 
 sub as_list {
-    my ( $self, @keys ) = @_;
+    my $self = CORE::shift;
     return
       map { ; $_ => $self->[_DATA]{$_} }
-      ( @keys ? @keys : grep !ref($_), @{ $self->[_KEYS] } );
+      ( @_ ? @_ : grep !ref($_), @{ $self->[_KEYS] } );
 }
 
 =method iterator
@@ -427,6 +425,7 @@ for the value.
 
 =cut
 
+# usually we avoid copying keys in @_; here we must for the closure
 sub iterator {
     my ( $self, @keys ) = @_;
     @keys = grep !ref($_), @{ $self->[_KEYS] } unless @keys;
