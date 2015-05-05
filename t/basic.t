@@ -17,6 +17,8 @@ subtest "constructors" => sub {
     my $hash;
 
     $hash = new_ok( HO, [], "new()" );
+    cmp_deeply( [ $hash->keys ],   [], "empty keys" );
+    cmp_deeply( [ $hash->values ], [], "empty values" );
 
     $hash = new_ok( HO, [ a => 1, b => 2 ], "new( \@pairs )" );
     cmp_deeply( [ $hash->keys ],   [qw/a b/], "keys ordered as expected" );
@@ -50,6 +52,10 @@ subtest "constructors" => sub {
         cmp_deeply( [ $extra->as_list ], [ c => undef, 1 => 2 ], "clone( 'c', '1' )" );
 
     }
+
+    $hash = new_ok( HO, [ a => 1, b => 2, a => 2 ] );
+    cmp_deeply( [ $hash->keys ],   [qw/a b/], "keys ordered as expected" );
+    cmp_deeply( [ $hash->values ], [qw/2 2/], "values ordered as expected" );
 
 };
 

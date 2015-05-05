@@ -57,23 +57,26 @@ use overload
 
 Constructs an object, with an optional list of key-value pairs.
 
+The position of a key corresponds to the first occurance in the list, but
+the value will be updated if the key is seen more than once.
+
+Current API available since 0.009.
+
 =cut
 
 sub new {
     my $class = shift;
 
-    return bless [ {}, [], undef, 0, 0 ], $class unless @_;
-
     Carp::croak("new() requires key-value pairs") unless @_ % 2 == 0;
 
-    # must stringify keys for _KEYS array
-    my @keys;
-    for ( my $i = 0; $i < $#_; $i += 2 ) {
-        push @keys, "$_[$i]";
+    my ( %data, @keys, $k );
+    while (@_) {
+        # must stringify keys for _KEYS array
+        $k = shift;
+        push @keys, "$k" unless exists $data{$k};
+        $data{$k} = shift;
     }
-    my $self = [ {@_}, \@keys, undef, 0, 0 ];
-
-    return bless $self, $class;
+    return bless [ \%data, \@keys, undef, 0, 0 ], $class;
 }
 
 =method clone

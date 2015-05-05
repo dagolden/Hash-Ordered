@@ -79,9 +79,9 @@ choices, C<Hash::Ordered> does well.
 
     Results for ordered hash creation for 10 elements
                t:h:i   136030/s
-              h:o_oo   125097/s  *
-              h:o_th   117705/s  *
              a:ah_rf   111411/s
+              h:o_oo   101293/s  *
+              h:o_th    98646/s  *
              t:ix_oo    61853/s
              t:ix_th    61715/s
              a:ah_cp    56375/s
@@ -93,8 +93,8 @@ choices, C<Hash::Ordered> does well.
     Results for ordered hash creation for 100 elements
                t:h:i    16503/s
              a:ah_rf    15398/s
-              h:o_oo    15343/s  *
-              h:o_th    15056/s  *
+              h:o_oo    11226/s  *
+              h:o_th    10793/s  *
                 a:oh     7783/s
              t:ix_th     7570/s
              t:ix_oo     7405/s
@@ -106,8 +106,8 @@ choices, C<Hash::Ordered> does well.
     Results for ordered hash creation for 1000 elements
                t:h:i     1552/s
              a:ah_rf     1509/s
-              h:o_th     1487/s  *
-              h:o_oo     1479/s  *
+              h:o_oo     1160/s  *
+              h:o_th     1158/s  *
                 a:oh      815/s
              t:ix_th      772/s
              t:ix_oo      757/s
@@ -294,8 +294,8 @@ Conversely, C<Array::AsHash> just gets worse.
 
     Results for creating 10 element hash then deleting ~10%
                t:h:i   131578/s
-              h:o_oo   105670/s  *
-              h:o_th    93237/s  *
+              h:o_oo    94598/s  *
+              h:o_th    84018/s  *
                 a:ah    67109/s
              t:ix_oo    55477/s
              t:ix_th    52792/s
@@ -306,8 +306,8 @@ Conversely, C<Array::AsHash> just gets worse.
 
     Results for creating 100 element hash then deleting ~10%
                t:h:i    17420/s
-              h:o_oo    10859/s  *
-              h:o_th    10010/s  *
+              h:o_oo     9242/s  *
+              h:o_th     8438/s  *
                 a:oh     5738/s
              t:ix_oo     3922/s
              t:ix_th     3862/s
@@ -318,8 +318,8 @@ Conversely, C<Array::AsHash> just gets worse.
 
     Results for creating 1000 element hash then deleting ~10%
                t:h:i     1635/s
-              h:o_oo     1074/s  *
-              h:o_th     1004/s  *
+              h:o_oo      934/s  *
+              h:o_th      799/s  *
                t:llh      319/s
                 a:oh      204/s
              d:xh_oo      152/s

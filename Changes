@@ -2,6 +2,10 @@ Revision history for Hash-Ordered
 
 {{$NEXT}}
 
+    [Fixed]
+
+    - Fixed bug in new() that mishandled duplicate keys
+
 0.008     2015-05-05 06:26:42-04:00 America/New_York
 
     [Optimized]
