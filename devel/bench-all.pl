@@ -16,10 +16,12 @@ use Array::AsHash;
 use Array::OrdHash;
 use Data::XHash;
 
-use constant COUNT => 5;
+use constant COUNT => $ENV{COUNT} // 5;
 use constant NUMS => [ 10, 100, 1000 ];
 
 STDOUT->autoflush(1);
+
+my %FILTER = map { $_ => 1 } split /,/, $ENV{FILTER};
 
 my %PAIRS = (
     map {
@@ -31,7 +33,9 @@ sub time_them {
     my (%mark) = @_;
     my %results;
 
-    for my $k ( sort keys %mark ) {
+    my @mods = grep { %FILTER ? $FILTER{$_} : 1 } sort keys %mark;
+
+    for my $k (@mods) {
 ##        warn "Timing $k...\n";
         my $res = countit( COUNT, $mark{$k} );
         my $iter_s = $res->iters / ( $res->cpu_a + 1e-9 );
