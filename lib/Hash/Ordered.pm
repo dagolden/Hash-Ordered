@@ -791,19 +791,24 @@ benchmarking results, see L<Hash::Ordered::Benchmarks>.
 
 =head2 Tie modules
 
-The following modules offer some sort of tie interface.  I don't like ties, in
-general, because of the extra indirection involved over a direct method call,
-but if you are willing to pay that penalty, you might want to try one of these.
+The following modules offer some sort of tie interface.  I don't like ties,
+in general, because of the extra indirection involved over a direct method
+call. Still, you can make any tied interface into a faster OO one with
+C<tied>:
 
-L<Tie::IxHash> is probably the most well known and includes an OO API.  If its
-warts and performance profile aren't a problem, it might serve.
+    tied( %tied_hash )->FETCH($key);
 
-L<Tie::Hash::Indexed> is implemented in XS and thus seems promising if pure-Perl
-isn't a criterion; it often fails tests on Perl 5.18 and above due to the hash
-randomization change.
+L<Tie::Hash::Indexed> is implemented in XS and thus seems promising if
+pure-Perl isn't a criterion; it generally fails tests on Perl 5.18 and
+above due to the hash randomization change.  Despite being XS, it is slower
+than Hash::Ordered at everything exception creation and deletion.
 
-These other modules below have very specific designs/limitations and I didn't
-find any of them suitable for general purpose use:
+L<Tie::IxHash> is probably the most well known and includes an OO API.
+Given the performance problems it has, "well known" is the only real reason
+to use it.
+
+These other modules below have very specific designs/limitations and I
+didn't find any of them suitable for general purpose use:
 
 =for :list
 * L<Tie::Array::AsHash> — array elements split with separator; tie API only
@@ -826,8 +831,8 @@ items up to 10x slower than Hash::Ordered.
 
 However, C<Array::AsHash> takes an arrayref to initialize, which is very
 fast and can return the list of pairs faster, too.  If you mostly create
-and list out ordered hashes and very rarely touch individual entries, I
-think this could be something to very cautiously consider.
+and list out very large ordered hashes and very rarely touch individual
+entries, I think this could be something to very cautiously consider.
 
 These other modules below have restrictions or particularly complicated
 implementations (often relying on C<tie>) and thus I didn't think any of
