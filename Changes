@@ -2,6 +2,11 @@ Revision history for Hash-Ordered
 
 {{$NEXT}}
 
+    [Fixed]
+
+    - pop() and shift() now return empty list when hash is empty instead of
+      warning and returning undef values.
+
 0.009     2015-05-05 12:14:04-04:00 America/New_York
 
     [Fixed]

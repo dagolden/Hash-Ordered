@@ -235,6 +235,19 @@ subtest "list methods" => sub {
             "hash keys/values correct after merging pairs"
         );
 
+        # termination checks
+        {
+            my $clone = $hash->clone;
+            1 while my ( $k, $v ) = $clone->pop;
+            pass("pop terminates");
+        }
+
+        {
+            my $clone = $hash->clone;
+            1 while my ( $k, $v ) = $clone->shift;
+            pass("shift terminates");
+        }
+
     }
 };
 

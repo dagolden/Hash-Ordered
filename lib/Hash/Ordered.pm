@@ -317,7 +317,7 @@ sub pop {
     }
     else {
         my $key = CORE::pop @{ $self->[_KEYS] };
-        return $key, delete $self->[_DATA]{$key};
+        return defined($key) ? ( $key, delete $self->[_DATA]{$key} ) : ();
     }
 }
 
@@ -362,7 +362,7 @@ sub shift {
     }
     else {
         my $key = CORE::shift @{ $self->[_KEYS] };
-        return $key, delete $self->[_DATA]{$key};
+        return defined($key) ? ( $key, delete $self->[_DATA]{$key} ) : ();
     }
 }
 
