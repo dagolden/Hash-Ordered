@@ -32,11 +32,13 @@ sub _invar {
             "all keys in _DATA are in _KEYS"
         ) or $err++;
 
-        is(
-            @$keys - $gcnt,
-            scalar( grep !ref($_), @$keys ),
-            "_KEYS length minus _GCNT equals number of non-tombstone keys in _KEYS"
-        ) or $err++;
+        my $tomb_cnt = scalar( grep ref($_), @$keys );
+        my $non_tomb_cnt = @$keys - $tomb_cnt;
+
+        is( @$keys - $gcnt,
+            $non_tomb_cnt,
+            "_KEYS length minus _GCNT equals number of non-tombstone keys in _KEYS" )
+          or $err++;
 
         if (%$data) {
             ok( !ref( $keys->[0] ),  "first element of _KEYS is not tombstone" ) or $err++;
@@ -46,12 +48,19 @@ sub _invar {
         # if indexing has kicked in, invariants change
         if ($indx) {
             pass("has _INDX");
+
+            # find unindexed on right
+            my $on_right = 0;
+            for my $i ( reverse 0 .. $#{$keys} ) {
+                last if !ref( $keys->[$i] );
+                $on_right++;
+            }
+
             ok( $gcnt <= @$keys / 2, "no more than half keys elements are tombstones" )
               or $err++;
-            is( min( values %$indx ) + $offs, 0, "min index value plus offset equals zero" )
-              or $err++;
-            is( max( values %$indx ) + $offs,
-                $#{$keys}, "max index value plus offset equals max index of keys" )
+
+            is( max( values %$indx ) + $offs + $on_right,
+                $#{$keys}, "max index value plus offset plus right-side-unindexed" )
               or $err++;
 
             cmp_deeply(
