@@ -46,6 +46,22 @@ sub _invar {
             is( min( values %$indx ) + $offs, 0, "min index value plus offset equals zero" );
             is( max( values %$indx ) + $offs,
                 $#{$keys}, "min index value plus offset equals max index of keys" );
+
+            cmp_deeply(
+                [ sort grep !ref($_), @$keys ],
+                [ sort keys %$indx ],
+                "all keys in _INDX are in _KEYS"
+            );
+
+            cmp_deeply(
+                [ sort keys %$data ],
+                [ sort keys %$indx ],
+                "all keys in _DATA are in _INDX"
+            );
+
+            my $mis_indexed = grep { ref($_) } map { $keys->[$_] } values %$indx;
+            is( $mis_indexed, 0, "_INDX elements are all valid" );
+
         }
         else {
             pass("does not have _INDX");
