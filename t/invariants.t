@@ -154,6 +154,19 @@ for my $size ( 0, 8, 98 ) {
     $h->delete($_) for @keys;
     _invar( $h, "$l: remaining keys deleted" );
 
+    # set/delete all keys
+    $h->set( $_ => -$_ ) for @keys;
+    _invar( $h, "$l: set all keys" );
+    $h->delete($_) for @keys;
+    _invar( $h, "$l: delete all keys" );
+
+    # double set
+    $h->set( $_ => -$_ ) for @keys;
+    $h->set( $_ => -$_ ) for @keys;
+    _invar( $h, "$l: double set all keys" );
+    $h->delete($_) for @keys;
+    _invar( $h, "$l: delete all keys" );
+
 }
 
 {
