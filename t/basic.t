@@ -260,6 +260,26 @@ subtest "list methods" => sub {
         }
 
     }
+
+    # empty hash tests
+    {
+        my $hash = new_ok(HO);
+
+        my ( $k, $v );
+
+        ( $k, $v ) = $hash->pop;
+        cmp_deeply( [ $k, $v ], [ undef, undef ], "pop empty in list context" );
+
+        ( $k, $v ) = $hash->shift;
+        cmp_deeply( [ $k, $v ], [ undef, undef ], "shift empty in list context" );
+
+        $v = $hash->pop;
+        is( $v, undef, "pop empty in scalar context" );
+
+        $v = $hash->shift;
+        is( $v, undef, "shift empty in scalar context" );
+    }
+
 };
 
 subtest "modifiers" => sub {

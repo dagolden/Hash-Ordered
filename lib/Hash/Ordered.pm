@@ -307,7 +307,8 @@ sub push {
     $value = $oh->pop;
 
 Removes and returns the last key-value pair in the ordered hash.
-In scalar context, only the value is returned.
+In scalar context, only the value is returned.  If the hash is empty,
+the returned key and value will be C<undef>.
 
 =cut
 
@@ -354,7 +355,8 @@ sub unshift {
     $value = $oh->shift;
 
 Removes and returns the first key-value pair in the ordered hash.
-In scalar context, only the value is returned.
+In scalar context, only the value is returned.  If the hash is empty,
+the returned key and value will be C<undef>.
 
 =cut
 

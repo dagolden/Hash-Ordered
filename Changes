@@ -9,7 +9,8 @@ Revision history for Hash-Ordered
 
     [Documented]
 
-    - Noted that pop() and shift() return just the value in scalar context.
+    - Noted that pop() and shift() return just the value in scalar context
+      and undef key/value if the ordered hash is empty.
 
 0.009     2015-05-05 12:14:04-04:00 America/New_York
 
