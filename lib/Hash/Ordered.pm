@@ -179,8 +179,11 @@ already exist in the hash, it will be added at the end.
 sub set {
     my ( $self, $key ) = @_; # don't copy $_[2] in case it's large
     if ( !exists $self->[_DATA]{$key} ) {
+        my $keys = $self->[_KEYS];
+        if ( my $indx = $self->[_INDX] ) {
+            $indx->{$key} = @$keys ? $indx->{ $keys->[-1] } + 1 : 0;
+        }
         CORE::push @{ $self->[_KEYS] }, "$key"; # stringify key
-        $self->[_INDX]{$key} = $#{ $self->[_KEYS] } if $self->[_INDX];
     }
     return $self->[_DATA]{$key} = $_[2];
 }
@@ -290,13 +293,15 @@ Returns the number of keys after the push is complete.
 
 sub push {
     my $self = CORE::shift;
-    my ( $data, $keys, $indx ) = @$self;
+    my ( $data, $keys ) = @$self;
     while (@_) {
         my ( $k, $v ) = splice( @_, 0, 2 );
         $self->delete($k) if exists $data->{$k};
         $data->{$k} = $v;
+        if ( my $indx = $self->[_INDX] ) {
+            $indx->{$k} = @$keys ? $indx->{ $keys->[-1] } + 1 : 0;
+        }
         CORE::push @$keys, "$k"; # stringify keys
-        $indx->{$k} = $#$keys if $indx;
     }
     return @$keys - $self->[_GCNT];
 }
@@ -338,13 +343,13 @@ Returns the number of keys after the unshift is complete.
 
 sub unshift {
     my $self = CORE::shift;
-    my ( $data, $keys, $indx ) = @$self;
+    my ( $data, $keys ) = @$self;
     while (@_) {
         my ( $k, $v ) = splice( @_, -2, 2 );
         $self->delete($k) if exists $data->{$k};
         $data->{$k} = $v;
         CORE::unshift @$keys, "$k"; # stringify keys
-        $indx->{$k} = -( ++$self->[_OFFS] ) if $indx;
+        $self->[_INDX]{$k} = -( ++$self->[_OFFS] ) if $self->[_INDX];
     }
     return @$keys - $self->[_GCNT];
 }

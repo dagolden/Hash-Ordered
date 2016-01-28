@@ -13,6 +13,8 @@ use List::Util qw/max min shuffle/;
 
 use constant HO => "Hash::Ordered";
 
+my $thresh = Hash::Ordered::_INDEX_THRESHOLD();
+
 sub _invar {
     my ( $hash, $label ) = @_;
 
@@ -20,64 +22,71 @@ sub _invar {
 
     subtest $label => sub {
 
+        my $err = 0;
+
         my ( $data, $keys, $indx, $offs, $gcnt ) = @$hash;
 
         cmp_deeply(
             [ sort grep !ref($_), @$keys ],
             [ sort keys %$data ],
             "all keys in _DATA are in _KEYS"
-        );
+        ) or $err++;
 
         is(
             @$keys - $gcnt,
             scalar( grep !ref($_), @$keys ),
             "_KEYS length minus _GCNT equals number of non-tombstone keys in _KEYS"
-        );
+        ) or $err++;
 
         if (%$data) {
-            ok( !ref( $keys->[0] ),  "first element of _KEYS is not tombstone" );
-            ok( !ref( $keys->[-1] ), "last element of _KEYS is not tombstone" );
+            ok( !ref( $keys->[0] ),  "first element of _KEYS is not tombstone" ) or $err++;
+            ok( !ref( $keys->[-1] ), "last element of _KEYS is not tombstone" )  or $err++;
         }
 
         # if indexing has kicked in, invariants change
         if ($indx) {
             pass("has _INDX");
-            ok( $gcnt <= @$keys / 2, "no more than half keys elements are tombstones" );
-            is( min( values %$indx ) + $offs, 0, "min index value plus offset equals zero" );
+            ok( $gcnt <= @$keys / 2, "no more than half keys elements are tombstones" )
+              or $err++;
+            is( min( values %$indx ) + $offs, 0, "min index value plus offset equals zero" )
+              or $err++;
             is( max( values %$indx ) + $offs,
-                $#{$keys}, "min index value plus offset equals max index of keys" );
+                $#{$keys}, "max index value plus offset equals max index of keys" )
+              or $err++;
 
             cmp_deeply(
                 [ sort grep !ref($_), @$keys ],
                 [ sort keys %$indx ],
                 "all keys in _INDX are in _KEYS"
-            );
+            ) or $err++;
 
             cmp_deeply(
                 [ sort keys %$data ],
                 [ sort keys %$indx ],
                 "all keys in _DATA are in _INDX"
-            );
+            ) or $err++;
 
-            my $mis_indexed = grep { ref($_) } map { $keys->[$_] } values %$indx;
-            is( $mis_indexed, 0, "_INDX elements are all valid" );
+            my $mis_indexed = grep { ref($_) } map { $keys->[ $_ + $offs ] } values %$indx;
+            is( $mis_indexed, 0, "_INDX elements are all valid" ) or $err++;
 
         }
         else {
             pass("does not have _INDX");
-            is( $offs, 0, "_OFFS is zero without _INDX set" );
-            is( $gcnt, 0, "_GCNT is zero without _INDX set" );
+            is( $offs, 0, "_OFFS is zero without _INDX set" ) or $err++;
+            is( $gcnt, 0, "_GCNT is zero without _INDX set" ) or $err++;
         }
+
+        diag explain $hash if $err;
     };
 
 }
 
 sub _new {
     my $size = shift;
-    return $size ? HO->new( 0 .. $size - 1 ) : HO->new;
+    return $size ? HO->new( map { ( $_ => $_ ) } 0 .. $size - 1 ) : HO->new;
 }
 
-for my $size ( 0, 8, 98 ) {
+for my $size ( 0, int( $thresh / 3 ), $thresh + 1, 3 * $thresh ) {
     my ( $k, $v, @pairs );
 
     my $l = "size $size";
@@ -88,6 +97,8 @@ for my $size ( 0, 8, 98 ) {
 
     # delete some keys
     my @keys = shuffle $h->keys;
+    my @sorted = sort { $a <=> $b } @keys;
+
     for ( 1 .. 3 ) {
         last unless @keys;
         $h->delete( shift(@keys) );
@@ -115,21 +126,21 @@ for my $size ( 0, 8, 98 ) {
     _invar( $h, "$l: after unshift" );
 
     # create tombstones at front
+    $h->delete(1);
     $h->delete(2);
-    $h->delete(4);
     _invar( $h, "$l: tombstones at key positions 1 & 2" );
     $h->delete(0);
     _invar( $h, "$l: tombstones at key positions 0" );
-    $h->unshift( 0 .. 5 );
-    _invar( $h, "$l: keys 0, 2, 4 unshifted" );
+    $h->unshift( map { $_ => $_ } 0 .. 3 );
+    _invar( $h, "$l: keys 1, 2, 3 unshifted" );
 
     # create tombstones at back
-    $h->delete( $size - 6 );
-    $h->delete( $size - 4 );
-    _invar( $h, "$l: tombstones at key positions -3 & -2" );
+    $h->delete( $size - 3 );
     $h->delete( $size - 2 );
+    _invar( $h, "$l: tombstones at key positions -3 & -2" );
+    $h->delete( $size - 1 );
     _invar( $h, "$l: tombstones at key positions -1" );
-    $h->push( $size - 6 .. $size - 1 );
+    $h->push( map { $_ => $_ } $size - 3 .. $size - 1 );
     _invar( $h, "$l: keys from -3, -2, and -1 pushed back " );
 
     # unshift and delete
@@ -155,17 +166,35 @@ for my $size ( 0, 8, 98 ) {
     _invar( $h, "$l: remaining keys deleted" );
 
     # set/delete all keys
+    $h->clear;
     $h->set( $_ => -$_ ) for @keys;
     _invar( $h, "$l: set all keys" );
     $h->delete($_) for @keys;
     _invar( $h, "$l: delete all keys" );
 
     # double set
-    $h->set( $_ => -$_ ) for @keys;
-    $h->set( $_ => -$_ ) for @keys;
-    _invar( $h, "$l: double set all keys" );
-    $h->delete($_) for @keys;
-    _invar( $h, "$l: delete all keys" );
+    $h->clear;
+    $h->set( $_ => $_ ) for @sorted;
+    $h->set( $_ => $_ ) for @sorted;
+    _invar( $h, "$l: double set" );
+
+    # double merge
+    $h->clear;
+    $h->set( $_ => $_ ) for @keys;
+    $h->set( $_ => $_ ) for @keys;
+    _invar( $h, "$l: double merge" );
+
+    # double push
+    $h->clear;
+    $h->push( $_ => $_ ) for @sorted;
+    $h->push( $_ => $_ ) for @sorted;
+    _invar( $h, "$l: double push" );
+
+    # double unshift
+    $h->clear;
+    $h->unshift( $_ => $_ ) for @keys;
+    $h->unshift( $_ => $_ ) for @keys;
+    _invar( $h, "$l: double unshift" );
 
 }
 
