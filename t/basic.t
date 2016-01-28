@@ -235,6 +235,17 @@ subtest "list methods" => sub {
             "hash keys/values correct after merging pairs"
         );
 
+        # scalar context pop/shift
+        {
+            $hash->push( zz => 'aa' );
+            my $v = $hash->pop;
+            is( $v, 'aa', "scalar pop returns value" );
+
+            $hash->unshift( yy => 'bb' );
+            $v = $hash->shift;
+            is( $v, 'bb', "scalar shift returns value" );
+        }
+
         # termination checks
         {
             my $clone = $hash->clone;

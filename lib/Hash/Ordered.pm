@@ -304,8 +304,10 @@ sub push {
 =method pop
 
     ($key, $value) = $oh->pop;
+    $value = $oh->pop;
 
 Removes and returns the last key-value pair in the ordered hash.
+In scalar context, only the value is returned.
 
 =cut
 
@@ -349,8 +351,10 @@ sub unshift {
 =method shift
 
     ($key, $value) = $oh->shift;
+    $value = $oh->shift;
 
 Removes and returns the first key-value pair in the ordered hash.
+In scalar context, only the value is returned.
 
 =cut
 
