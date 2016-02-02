@@ -2,6 +2,8 @@ Revision history for Hash-Ordered
 
 {{$NEXT}}
 
+0.010     2016-02-01 19:02:50-05:00 America/New_York
+
     [Fixed]
 
     - pop() and shift() now return empty list when hash is empty instead of
