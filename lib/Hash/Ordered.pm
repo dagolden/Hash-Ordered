@@ -644,7 +644,7 @@ sub FIRSTKEY {
 }
 
 sub NEXTKEY {
-    return $_[0]->[_ITER]->();
+    return defined( $_[0]->[_ITER] ) ? $_[0]->[_ITER]->() : undef;
 }
 
 sub SCALAR {
