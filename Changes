@@ -7,6 +7,10 @@ Revision history for Hash-Ordered
     - pop() and shift() now return empty list when hash is empty instead of
       warning and returning undef values.
 
+    - push() and unshift() of existing keys would cause corruption in
+      certain cases involving optimized deletion of the existing key.  This
+      has been fixed.
+
     [Documented]
 
     - Noted that pop() and shift() return just the value in scalar context
