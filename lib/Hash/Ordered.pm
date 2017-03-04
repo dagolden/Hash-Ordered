@@ -390,7 +390,7 @@ the end of the hash.
 sub merge {
     my $self = CORE::shift;
     while (@_) {
-        my ( $k, $v ) = splice( @_, -2, 2 );
+        my ( $k, $v ) = splice( @_, 0, 2 );
         if ( !exists $self->[_DATA]{$k} ) {
             my $size = CORE::push @{ $self->[_KEYS] }, "$k"; # stringify key
             $self->[_INDX]{$k} = $size - 1 if $self->[_INDX];

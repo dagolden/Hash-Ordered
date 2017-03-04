@@ -227,11 +227,11 @@ subtest "list methods" => sub {
             "hash keys/values correct after unshifting existing key"
         );
 
-        ok( $hash->merge( z => 2, c => 3 ), "merging key-value pairs" );
+        ok( $hash->merge( z => 2, c => 3, d => 4 ), "merging key-value pairs" );
 
         cmp_deeply(
             [ $hash->as_list ],
-            [ z => 2, @pairs, b => 2, c => 3 ],
+            [ z => 2, @pairs, b => 2, c => 3, d => 4 ],
             "hash keys/values correct after merging pairs"
         );
 

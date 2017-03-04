@@ -7,6 +7,8 @@ Revision history for Hash-Ordered
     - Fixed bug iterating a tied hash and clearing the underlying hash
       of data.
 
+    - Fixed bug in merge() where order of new pairs was reversed.
+
 0.010     2016-02-01 19:02:50-05:00 America/New_York
 
     [Fixed]
