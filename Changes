@@ -2,6 +2,8 @@ Revision history for Hash-Ordered
 
 {{$NEXT}}
 
+0.011     2017-03-03 22:35:34-05:00 America/New_York (TRIAL RELEASE)
+
     [Fixed]
 
     - Fixed bug iterating a tied hash and clearing the underlying hash
