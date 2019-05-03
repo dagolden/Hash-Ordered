@@ -577,7 +577,13 @@ Current API available since 0.005.
 =cut
 
 sub or_equals {
-    return $_[0]->[_DATA]{ $_[1] } ||= $_[2];
+    my ($self,$key) = @_;
+
+    if ( my $val = $self->get($key) ) {
+        return $val;
+    }
+
+    return $self->set($key,$_[2]);
 }
 
 =method dor_equals
@@ -592,30 +598,14 @@ Current API available since 0.005.
 
 =cut
 
-BEGIN {
-    if ( $] ge '5.010' ) {
-        ## no critic
-        eval q{
-                sub dor_equals {
-                    return $_[0]->[_DATA]{$_[1]} //= $_[2];
-                }
-            };
-        die $@ if $@; # uncoverable branch true
+sub dor_equals {
+    my ($self,$key) = @_;
+
+    if ( defined( my $val = $self->get($key) ) ) {
+        return $val;
     }
-    else {
-        ## no critic
-        eval q{
-                sub dor_equals {
-                    if ( defined $_[0]->[_DATA]{$_[1]} ) {
-                        return $_[0]->[_DATA]{$_[1]};
-                    }
-                    else {
-                        return $_[0]->[_DATA]{$_[1]} = $_[2];
-                    }
-                }
-            };
-        die $@ if $@; # uncoverable branch true
-    }
+
+    return $self->set($key,$_[2]);
 }
 
 #--------------------------------------------------------------------------#
