@@ -2,6 +2,8 @@ Revision history for Hash-Ordered
 
 {{$NEXT}}
 
+0.013     2019-07-03 11:37:59-04:00 America/New_York (TRIAL RELEASE)
+
     [Fixed]
 
     - Fixed bugs in or_equals and dor_equals. (GH #8)
