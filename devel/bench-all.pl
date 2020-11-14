@@ -42,7 +42,7 @@ sub time_them {
         $results{$k} = $iter_s;
     }
 
-    printf( "%20s %10s%s\n", $_, int( $results{$_} ) . "/s", $_ =~ /^h:o/ ? "  *" : "" )
+    printf( "%20s %10s%s\n", $_, int( $results{$_} ) . "/s", $_ =~ /^h:o/ ? "  *" : $_ =~ /^t:h:i/ ? "  ~" : "" )
       for sort { $results{$b} <=> $results{$a} } keys %results;
 
     say "";
@@ -81,7 +81,11 @@ $TESTS{create} = sub {
             tie my %h, 'Tie::LLHash', @{ $PAIRS{$size} };
         };
 
-        $mark{"t:h:i"} = sub {
+        $mark{"t:h:i_oo"} = sub {
+            my $h = Tie::Hash::Indexed->new( @{ $PAIRS{$size} } );
+        };
+
+        $mark{"t:h:i_th"} = sub {
             tie my %h, 'Tie::Hash::Indexed', @{ $PAIRS{$size} };
         };
 
@@ -123,10 +127,11 @@ $TESTS{get} = sub {
         my $aah    = Array::AsHash->new( { array => [ @{ $PAIRS{$size} } ] } );
         my $dxh    = Data::XHash::xh( @{ $PAIRS{$size} } );
         my $aoh    = Array::OrdHash->new( @{ $PAIRS{$size} } );
+        my $thi_oo = Tie::Hash::Indexed->new( @{ $PAIRS{$size} } );
         tie my %ho_th,  'Hash::Ordered',      @{ $PAIRS{$size} };
         tie my %tix_th, 'Tie::IxHash',        @{ $PAIRS{$size} };
         tie my %tllh,   'Tie::LLHash',        @{ $PAIRS{$size} };
-        tie my %thi,    'Tie::Hash::Indexed', @{ $PAIRS{$size} };
+        tie my %thi_th, 'Tie::Hash::Indexed', @{ $PAIRS{$size} };
 
         my ( %mark, $v );
         my @keys = keys %{ { @{ $PAIRS{$size} } } };
@@ -139,7 +144,8 @@ $TESTS{get} = sub {
         $mark{"t:ix_oo"} = sub { $v = $tix_oo->FETCH($_) for @lookup };
         $mark{"t:ix_th"} = sub { $v = $tix_th{$_}        for @lookup };
         $mark{"t:llh"}   = sub { $v = $tllh{$_}          for @lookup };
-        $mark{"t:h:i"}   = sub { $v = $thi{$_}           for @lookup };
+        $mark{"t:h:i_oo"} = sub { $v = $thi_oo->get($_)  for @lookup };
+        $mark{"t:h:i_th"} = sub { $v = $thi_th{$_}       for @lookup };
         $mark{"a:ah"}    = sub { $v = $aah->get($_)      for @lookup };
         $mark{"d:xh_oo"} = sub { $v = $dxh->fetch($_)    for @lookup };
         $mark{"d:xh_rf"} = sub { $v = $dxh->{$_}         for @lookup };
@@ -163,10 +169,11 @@ $TESTS{replace} = sub {
         my $aah    = Array::AsHash->new( { array => [ @{ $PAIRS{$size} } ] } );
         my $dxh    = Data::XHash::xh( @{ $PAIRS{$size} } );
         my $aoh    = Array::OrdHash->new( @{ $PAIRS{$size} } );
+        my $thi_oo = Tie::Hash::Indexed->new( @{ $PAIRS{$size} } );
         tie my %ho_th,  'Hash::Ordered',      @{ $PAIRS{$size} };
         tie my %tix_th, 'Tie::IxHash',        @{ $PAIRS{$size} };
         tie my %tllh,   'Tie::LLHash',        @{ $PAIRS{$size} };
-        tie my %thi,    'Tie::Hash::Indexed', @{ $PAIRS{$size} };
+        tie my %thi_th, 'Tie::Hash::Indexed', @{ $PAIRS{$size} };
 
         my ( %mark, $v );
         my @keys = keys %{ { @{ $PAIRS{$size} } } };
@@ -180,7 +187,8 @@ $TESTS{replace} = sub {
         $mark{"t:ix_oo"} = sub { $tix_oo->STORE( $_, $new_value ) for @lookup };
         $mark{"t:ix_th"} = sub { $tix_th{$_} = $new_value for @lookup };
         $mark{"t:llh"}   = sub { $tllh{$_}   = $new_value for @lookup };
-        $mark{"t:h:i"}   = sub { $thi{$_}    = $new_value for @lookup };
+        $mark{"t:h:i_oo"} = sub { $thi_oo->set( $_, $new_value ) for @lookup };
+        $mark{"t:h:i_th"} = sub { $thi_th{$_} = $new_value for @lookup };
         $mark{"a:ah"} = sub { $aah->put( $_, $new_value ) for @lookup };
         $mark{"d:xh_oo"} = sub { $dxh->store( $_, $new_value ) for @lookup };
         $mark{"d:xh_rf"} = sub { $dxh->{$_} = $new_value for @lookup };
@@ -231,9 +239,14 @@ $TESTS{add} = sub {
             tied(%tllh)->last( irand(), 42 ) for 1 .. $n;
         };
 
-        $mark{"t:h:i"} = sub {
-            tie my %thi, 'Tie::Hash::Indexed';
-            $thi{ irand() } = 42 for 1 .. $n;
+        $mark{"t:h:i_oo"} = sub {
+            my $thi_oo = Tie::Hash::Indexed->new;
+            $thi_oo->set( irand(), 42 ) for 1 .. $n;
+        };
+
+        $mark{"t:h:i_th"} = sub {
+            tie my %thi_th, 'Tie::Hash::Indexed';
+            $thi_th{ irand() } = 42 for 1 .. $n;
         };
 
         $mark{"a:ah"} = sub {
@@ -304,9 +317,14 @@ $TESTS{delete} = sub {
             delete $tllh{$_} for @lookup;
         };
 
-        $mark{"t:h:i"} = sub {
-            tie my %thi, 'Tie::Hash::Indexed', @{ $PAIRS{$size} };
-            delete $thi{$_} for @lookup;
+        $mark{"t:h:i_oo"} = sub {
+            my $thi_oo = Tie::Hash::Indexed->new( @{ $PAIRS{$size} } );
+            $thi_oo->delete($_) for @lookup;
+        };
+
+        $mark{"t:h:i_th"} = sub {
+            tie my %thi_th, 'Tie::Hash::Indexed', @{ $PAIRS{$size} };
+            delete $thi_th{$_} for @lookup;
         };
 
         $mark{"a:ah"} = sub {
@@ -347,10 +365,11 @@ $TESTS{list} = sub {
         my $aah    = Array::AsHash->new( { array => [ @{ $PAIRS{$size} } ] } );
         my $dxh    = Data::XHash::xh( @{ $PAIRS{$size} } );
         my $aoh    = Array::OrdHash->new( @{ $PAIRS{$size} } );
+        my $thi_oo = Tie::Hash::Indexed->new( @{ $PAIRS{$size} } );
         tie my %ho_th,  'Hash::Ordered',      @{ $PAIRS{$size} };
         tie my %tix_th, 'Tie::IxHash',        @{ $PAIRS{$size} };
         tie my %tllh,   'Tie::LLHash',        @{ $PAIRS{$size} };
-        tie my %thi,    'Tie::Hash::Indexed', @{ $PAIRS{$size} };
+        tie my %thi_th, 'Tie::Hash::Indexed', @{ $PAIRS{$size} };
 
         my ( %mark, @list );
 
@@ -361,7 +380,8 @@ $TESTS{list} = sub {
         };
         $mark{"t:ix_th"} = sub { @list = %tix_th };
         $mark{"t:llh"}   = sub { @list = %tllh };
-        $mark{"t:h:i"}   = sub { @list = %thi };
+        $mark{"t:h:i_oo"} = sub { @list = $thi_oo->as_list };
+        $mark{"t:h:i_th"} = sub { @list = %thi_th };
         $mark{"a:ah"}    = sub { @list = $aah->get_array };
         $mark{"d:xh"}    = sub { @list = $dxh->as_array };
         $mark{"a:oh"}    = sub { @list = %$aoh };
