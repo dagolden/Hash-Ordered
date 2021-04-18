@@ -29,9 +29,7 @@ the benchmark output in shorthand:
 * L<Tie::IxHash> — denoted C<t:ix>
 * L<Tie::LLHash> — denoted C<t:llh>
 
-Note that L<Tie::Hash::Indexed> is written in XS and also may require
-forced installation as its tests often fail for Perl 5.18+ due to the
-hash randomization change.
+Note that L<Tie::Hash::Indexed> is written in XS.
 
 If there are different methods of doing something with a module, the
 variations are described in each section below.
